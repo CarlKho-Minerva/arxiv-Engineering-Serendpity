@@ -27,7 +27,7 @@ def main():
         src, month = key.split("|")
         rows.append({"source": src, "month": pd.Timestamp(month + "-01"), **c})
     df = pd.DataFrame(rows).fillna(0)
-    allm = df[df.source == "all"].set_index("month").sort_index()
+    allm = df[df.source == "all"].set_index("month").sort_index().drop(columns=["source"])
     allm = allm[allm.index >= "2011-01-01"]
     # 3-month rolling to tame monthly noise
     r = allm.rolling(3, min_periods=1).mean()
@@ -37,8 +37,11 @@ def main():
     ax.plot(r.index, r["new_threads_outbound"], color=ACC, label="new threads, self-initiated")
     ax.set_ylabel("new threads / month"); ax.legend(frameon=False, fontsize=8)
     ax = axes[1]
-    rate = (allm["replied_new_inbound"] / allm["new_threads_inbound"].replace(0, float("nan"))).rolling(3, min_periods=1).mean()
+    num = allm["replied_new_inbound"].rolling(3, min_periods=1).sum()
+    den = allm["new_threads_inbound"].rolling(3, min_periods=1).sum()
+    rate = (num / den).where(den >= 15)   # mask windows with < 15 new inbound threads per 3 months
     ax.plot(rate.index, rate, color=INK); ax.set_ylim(0, 1); ax.set_ylabel("reply rate to\nnew inbound (7 d)")
+    ax.text(0.01, 0.06, "masked where < 15 new inbound threads per 3-month window", transform=ax.transAxes, fontsize=7, color=MUTE)
     ax = axes[2]
     ax.plot(r.index, r["dormant_self_initiated"], color=ACC, label="self-initiated")
     ax.plot(r.index, r["dormant_reactivated"] - r["dormant_self_initiated"], color=MUTE, label="other-initiated")
