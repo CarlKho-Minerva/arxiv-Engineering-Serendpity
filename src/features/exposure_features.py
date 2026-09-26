@@ -77,14 +77,22 @@ def main():
     ap.add_argument("--candidates", choices=["weak", "all"], default="weak")
     ap.add_argument("--members", type=int, default=5)
     ap.add_argument("--seed", type=int, default=0)
+    ap.add_argument("--content", action="store_true", help="add local-embedding features (data/derived/emb_*.npz)")
+    ap.add_argument("--train-on", choices=["candidates", "all"], default="candidates",
+                    help="fit the reply model on train-period candidates only, or on every train-period exposure")
+    ap.add_argument("--pca", type=int, default=32)
+    ap.add_argument("--judgments", action="store_true", help="add AnyJev typed-judgment features (data/derived/judgments.parquet)")
+    ap.add_argument("--novelty", choices=["meta", "content"], default="meta",
+                    help="which novelty feeds the policies (metadata new-thread flag, or 1 - max cosine to own recent text)")
     a = ap.parse_args()
     H = a.horizon
     df = pd.read_parquet(IN)
     df["t"] = pd.to_datetime(df["t"], utc=True)
     stream_end = df["t"].max()
-    if a.candidates == "weak":
-        df = df[df["is_new_thread"] | df["is_dormant"]].copy()
+    df["is_candidate"] = (df["is_new_thread"] | df["is_dormant"]) if a.candidates == "weak" else True
     df = df[df[f"label_complete_{H}"]].copy()
+    if a.train_on == "candidates":
+        df = df[df["is_candidate"]].copy()
 
     # ---- fixed chronological split (set before any evaluation; recorded) ----
     split = ChronoSplit(train_end=dt.datetime(2019, 12, 31, 23, 59, 59, tzinfo=UTC),
@@ -102,6 +110,48 @@ def main():
     X = design(feat_src)
     y = df["replied_7d"].astype(int).to_numpy()
     tr = (df["split"] == "train").to_numpy()
+    content_novelty = content_sim_mean = None
+    if a.content:
+        ez = np.load(ROOT / "data" / "derived" / "emb_exposures.npz")
+        sz = np.load(ROOT / "data" / "derived" / "emb_self.npz")
+        eidx = {e: i for i, e in enumerate(ez["exposure_id"])}
+        E = ez["emb"].astype(np.float32)
+        S = sz["emb"].astype(np.float32); st = sz["t_ns"]
+        rows = np.array([eidx.get(e, -1) for e in df["exposure_id"]])
+        if (rows < 0).any():
+            raise LeakageError(f"{int((rows < 0).sum())} exposures have no embedding; refusing partial features")
+        Ex = E[rows]
+        tn = df["t"].to_numpy().astype("datetime64[ns]").astype("int64")
+        w = 90 * 86400 * 10**9
+        lo = np.searchsorted(st, tn - w, "left"); hi = np.searchsorted(st, tn, "left")   # strictly before t
+        mx = np.full(len(df), np.nan); mn = np.full(len(df), np.nan)
+        for i in range(len(df)):
+            if hi[i] > lo[i]:
+                sims = S[lo[i]:hi[i]] @ Ex[i]
+                mx[i] = sims.max(); mn[i] = sims.mean()
+        content_novelty = np.where(np.isnan(mx), 1.0, 1.0 - np.clip(mx, -1, 1))
+        content_sim_mean = np.where(np.isnan(mn), 0.0, mn)
+        X["c_novelty"] = content_novelty; X["c_sim_mean"] = content_sim_mean
+        X["c_window_n"] = np.log1p(hi - lo)
+        from sklearn.decomposition import PCA
+        pca = PCA(n_components=a.pca, random_state=a.seed).fit(Ex[tr])
+        Z = pca.transform(Ex)
+        for j in range(a.pca):
+            X[f"pc{j}"] = Z[:, j]
+    J = None
+    if a.judgments:
+        J = pd.read_parquet(ROOT / "data" / "derived" / "judgments.parquet").set_index("exposure_id")
+        jcols = [c for c in J.columns if c.startswith(("p_", "ev_"))]
+        J = J[jcols].reindex(df["exposure_id"].to_numpy())
+        if J.isna().any(axis=None):
+            miss = int(J.isna().any(axis=1).sum())
+            if a.train_on == "all":
+                # judgments exist for candidates only: fill non-candidates with the train-candidate mean
+                J = J.fillna(J.loc[df["is_candidate"].to_numpy() & tr].mean())
+            else:
+                raise LeakageError(f"{miss} candidate exposures have no judgment row; run judgments first")
+        for c in jcols:
+            X["j_" + c] = J[c].to_numpy()
     rng = np.random.default_rng(a.seed)
     probs = []
     for m in range(a.members):
@@ -119,7 +169,16 @@ def main():
     out["relevance"] = P.mean(0)
     out["uncertainty"] = P.std(0)
     out["info_gain"] = entropy(P.mean(0)) - entropy(P).mean(0)
-    out["novelty"] = np.where(df["is_new_thread"], 1.0, 1.0 / (1.0 + df["prior_contact_events"]))
+    out["novelty_meta"] = np.where(df["is_new_thread"], 1.0, 1.0 / (1.0 + df["prior_contact_events"]))
+    if content_novelty is not None:
+        out["content_novelty"] = content_novelty; out["content_sim_mean"] = content_sim_mean
+    out["novelty"] = content_novelty if (a.novelty == "content" and content_novelty is not None) else out["novelty_meta"]
+    if J is not None:
+        for c in J.columns:
+            out["j_" + c] = J[c].to_numpy()
+        out["option_value_proxy"] = out["option_value"]
+        out["option_value"] = np.clip(J["ev_option_value"].to_numpy() / 3.0, 0, 1)
+        out["opportunity"] = J["p_invites_action"].to_numpy()
     out["popularity"] = df["source_prior_share"].fillna(0)
     out["option_value"] = 0.5 * df["is_new_thread"].astype(float) + 0.5 * np.minimum(1.0, np.log1p(df["npart"]) / np.log1p(50))
     p99 = np.log1p(df.loc[tr, "chars_first_msg"]).quantile(0.99)
@@ -129,12 +188,14 @@ def main():
     out["consequential"] = df[f"consequential_auto_{H}"].astype(int)
     out["gain"] = np.log1p(df[f"bursts_{H}"])
     out["is_new_thread"] = df["is_new_thread"]; out["is_dormant"] = df["is_dormant"]
+    keep = df["is_candidate"].to_numpy()
+    out = out[keep]
     OUT.parent.mkdir(parents=True, exist_ok=True)
     out.reset_index(drop=True).to_parquet(OUT, index=False)
     # relevance-model sanity on val (AUC) — the clone-of-engagement half of the table
     from sklearn.metrics import roc_auc_score
-    va = (df["split"] == "val").to_numpy(); te = (df["split"] == "test").to_numpy()
-    info = {"generated": dt.datetime.now(UTC).isoformat(timespec="seconds"), "horizon_days": H, "candidates": a.candidates,
+    va = ((df["split"] == "val") & df["is_candidate"]).to_numpy()
+    info = {"generated": dt.datetime.now(UTC).isoformat(timespec="seconds"), "horizon_days": H, "candidates": a.candidates, "content": a.content, "train_on": a.train_on, "judgments": a.judgments, "novelty": a.novelty,
             "split": {k: (v.isoformat() if isinstance(v, dt.datetime) else v) for k, v in dataclasses.asdict(split).items()},
             "stream_end": str(stream_end), "n": {s: int((df["split"] == s).sum()) for s in ("train", "val", "test")},
             "positives": {s: int(df.loc[df["split"] == s, f"consequential_auto_{H}"].sum()) for s in ("train", "val", "test")},

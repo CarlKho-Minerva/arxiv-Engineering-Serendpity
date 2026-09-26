@@ -18,6 +18,7 @@ dependencies = [
 [project.optional-dependencies]
 embed = ["sentence-transformers>=3.0"]
 umap = ["umap-learn>=0.5"]
+judge = ["anyjev>=0.0.1", "mlx-lm>=0.31; sys_platform == 'darwin'"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

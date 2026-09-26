@@ -1,9 +1,9 @@
 {
- "generated": "2026-09-26T19:50:04+00:00",
+ "generated": "2026-09-26T19:49:50+00:00",
  "horizon_days": 365,
  "candidates": "weak",
  "content": true,
- "train_on": "all",
+ "train_on": "candidates",
  "split": {
   "train_end": "2019-12-31T23:59:59+00:00",
   "val_start": "2021-01-01T00:00:00+00:00",
@@ -13,21 +13,21 @@
  },
  "stream_end": "2026-09-15 02:54:32+00:00",
  "n": {
-  "train": 8052,
-  "val": 9670,
-  "test": 6067
+  "train": 776,
+  "val": 905,
+  "test": 738
  },
  "positives": {
-  "train": 5263,
-  "val": 5831,
-  "test": 3693
+  "train": 140,
+  "val": 134,
+  "test": 52
  },
  "weeks_with_positives": {
   "train": 100,
   "val": 63,
   "test": 39
  },
- "relevance_auc_val": 0.6425812856788284,
+ "relevance_auc_val": 0.5930801687763714,
  "relevance_auc_test_NOT_TO_BE_READ_BEFORE_FREEZE": null,
  "features": [
   "new",

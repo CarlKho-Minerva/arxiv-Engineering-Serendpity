@@ -52,3 +52,15 @@ Candidate set = weak-tie exposures per ISO week: mean 8.6, median 8, p90 16. Bud
 - Freeze `annotations/PROTOCOL.md` (Tier A definition above + Tier B sampling) as git tag `annotation-v1`; only then run `--split-eval test`.
 - Tier B manual labels: sample from the val+test weak-tie pool blind to rankings (Carl).
 - Link counterparts across sources (hashed name join on the raw exports, on the PC) to recover the `new_context` clause.
+
+## Addendum 2026-09-26: local content embeddings (validation split)
+
+Encoder: `paraphrase-multilingual-MiniLM-L12-v2` on the Mac (MPS), 35,168 exposure texts + 396,381 subject messages ≥ 20 chars, `src/features/embed_messages.py`. Content features: 32 PCA components of the inbound message embedding, mean/max cosine to the subject's own messages in the prior 90 days, window size. Content novelty = 1 − max cosine.
+
+| variant | reply-model val AUC | relevance r@3 | novelty r@3 | hybrid r@3 | random-diversity r@3 | hybrid MRR |
+|---|---|---|---|---|---|---|
+| metadata only | 0.544 | 0.372 [0.27, 0.48] | 0.464 [0.36, 0.57] | 0.409 [0.29, 0.52] | 0.504 [0.40, 0.61] | 0.308 |
+| content, reply model on candidates (AUC 0.593) | 0.593 | 0.319 [0.22, 0.43] | 0.381 [0.27, 0.49] | 0.331 [0.23, 0.44] | 0.504 [0.40, 0.61] | 0.308 |
+| content, reply model on all exposures (AUC 0.643) | 0.643 | 0.353 [0.25, 0.46] | 0.381 [0.27, 0.49] | 0.344 [0.25, 0.44] | 0.504 [0.40, 0.61] | 0.312 |
+
+Reading: content raises the reply model's AUC (0.54 → 0.59 → 0.64 when trained on all 15k train-period exposures), but no policy beats random-with-diversity, and **embedding novelty is worse than the metadata new-thread flag** (novelty r@3 0.464 → 0.381): "unlike what he recently wrote" is not the kind of novelty that predicts a lasting tie. The hybrid's train-tuned weights move toward uncertainty and information gain once the reply model has signal, without changing the outcome. Next: typed judgments (AnyJev L0 on the PC's Gemma 4 31B) as features; see `src/features/judgments_anyjev.py`.
