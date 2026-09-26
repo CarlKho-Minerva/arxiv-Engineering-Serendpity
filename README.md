@@ -7,19 +7,19 @@ an agent that surfaces what the subject is failing to consider (an exploration
 policy), and whether that difference is measurable retrospectively on fifteen
 years of logged exposures and choices.
 
-**Status (2026-09-26, first session):** inventory complete; prior clone result
-located and independently reproduced; retrospective experiment specified with a
-falsifier; leakage-safe pipeline and tests in place; demo and figures run on a
-clearly labelled synthetic fixture. No serendipity result exists yet.
+**Status (2026-09-26, session 2):** inventory complete; prior clone result reproduced;
+E1 exposure table built from message metadata; validation-only retrospective run
+done (preliminary, unfavourable to the exploration terms as operationalized);
+demo and Figure 2 still on a synthetic fixture. No test-split result exists.
 
 ## What is measured vs. proposed
 
 | | status |
 |---|---|
 | Behavioral clone (RQ1): personal LoRA lifts 5-way next-action top-1 from 28.0% to 37.8% (+9.8, CI [6.8, 13.4], 20/21 days) | **measured**, reproduced by `scripts/verify_carl_model.py` → `results/carl_model_verified.json` |
-| Retrospective serendipity ranking (RQ3–RQ5) | **specified** (`EXPERIMENT_PLAN.md`), pipeline runs on synthetic data only |
+| Retrospective serendipity ranking (RQ3–RQ5) | **E1 table built** (35,168 contact events 2011–2026; 3,719 weak-tie); **validation-only run**: relevance-only worst, hybrid does not beat random-with-diversity, reply-model AUC 0.54. See `results/tables/E1_report.md`. Test split untouched until the annotation freeze. |
 | Algorithmic-mirror time series (RQ2, RQ7) | **not testable**: recommendation exports are single 2026 snapshots |
-| Exploration rate across life periods (RQ6) | **testable now** from the normalized message stream; not yet run |
+| Exploration rate across life periods (RQ6) | **exploratory pass done**: fig3 + yearly tables (messages) + Facebook friends/groups per month |
 
 ## Layout
 

@@ -1,0 +1,30 @@
+{
+ "generated": "2026-09-26T19:38:19+00:00",
+ "n_messages": 3082593,
+ "n_threads": 7139,
+ "n_exposures": 35168,
+ "range": [
+  "2011-11-08 12:53:37.092000+00:00",
+  "2026-09-15 02:54:32+00:00"
+ ],
+ "by_source": {
+  "msg_discord": 2467,
+  "msg_gchat": 71,
+  "msg_gmail": 1114,
+  "msg_gvoice": 405,
+  "msg_instagram": 4491,
+  "msg_linkedin": 489,
+  "msg_messenger": 20156,
+  "msg_telegram": 5759,
+  "msg_twitter": 216
+ },
+ "new_thread_exposures": 2856,
+ "dormant_exposures": 863,
+ "reply_rate_all": 0.5315059144676979,
+ "reply_rate_new": 0.52906162464986,
+ "reply_rate_dormant": 0.5538818076477404,
+ "consequential_auto_90_rate_complete": 0.6410701373825018,
+ "consequential_auto_365_rate_complete": 0.6256069672002756,
+ "consequential_auto_90_rate_weak_complete": 0.12005532503457815,
+ "consequential_auto_365_rate_weak_complete": 0.13349891338093758
+}

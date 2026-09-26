@@ -18,9 +18,11 @@ from src.policies.scoring import DEFAULT_POLICIES, ranks_from_scores  # noqa: E4
 
 
 def main():
+    import argparse
+    ap = argparse.ArgumentParser(); ap.add_argument("--split-eval", default="val"); a = ap.parse_args()
     real = ROOT / "data" / "derived" / "exposures_features.parquet"
     if real.exists():
-        df = pd.read_parquet(real); tag = "REAL"
+        df = pd.read_parquet(real); df = df[df["split"] == a.split_eval]; tag = f"REAL {a.split_eval} split (Tier A labels)"
     else:
         df = load_synthetic(); tag = "SYNTHETIC (not a result)"
     rng = np.random.default_rng(0)

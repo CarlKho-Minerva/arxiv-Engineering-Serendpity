@@ -1,0 +1,63 @@
+{
+ "generated": "2026-09-26T19:40:10+00:00",
+ "horizon_days": 365,
+ "candidates": "weak",
+ "split": {
+  "train_end": "2019-12-31T23:59:59+00:00",
+  "val_start": "2021-01-01T00:00:00+00:00",
+  "val_end": "2022-12-31T23:59:59+00:00",
+  "test_start": "2024-01-01T00:00:00+00:00",
+  "embargo_days": 366
+ },
+ "stream_end": "2026-09-15 02:54:32+00:00",
+ "n": {
+  "train": 776,
+  "val": 905,
+  "test": 738
+ },
+ "positives": {
+  "train": 140,
+  "val": 134,
+  "test": 52
+ },
+ "weeks_with_positives": {
+  "train": 100,
+  "val": 63,
+  "test": 39
+ },
+ "relevance_auc_val": 0.5437527922561429,
+ "relevance_auc_test_NOT_TO_BE_READ_BEFORE_FREEZE": null,
+ "features": [
+  "new",
+  "dormant",
+  "group",
+  "l_npart",
+  "l_prior_msgs_in",
+  "l_prior_msgs_out",
+  "l_prior_contact_events",
+  "l_thread_age_days",
+  "l_global_30d_msgs_out",
+  "l_global_30d_active_threads",
+  "l_chars_first_msg",
+  "prr",
+  "prr_missing",
+  "l_days_since_last_self",
+  "days_since_last_self_missing",
+  "l_days_since_last_any",
+  "days_since_last_any_missing",
+  "src_share",
+  "h_sin",
+  "h_cos",
+  "dow",
+  "src_msg_discord",
+  "src_msg_gchat",
+  "src_msg_gmail",
+  "src_msg_gvoice",
+  "src_msg_instagram",
+  "src_msg_linkedin",
+  "src_msg_messenger",
+  "src_msg_telegram",
+  "src_msg_twitter"
+ ],
+ "ensemble_members": 5
+}

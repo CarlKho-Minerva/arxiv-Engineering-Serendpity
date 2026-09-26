@@ -9,7 +9,7 @@ copied into the repo.
 `scripts/verify_carl_model.py` → `results/carl_model_verified.json`. Independent
 recomputation from raw per-case scores. Matches the reported numbers (RQ1).
 
-## E1. Exposure–action–outcome table (Phase 3, 5)
+## E1. Exposure–action–outcome table (Phase 3, 5) — BUILT 2026-09-26 (messages); see results/tables/E1_report.md
 
 **Exposure types and their observed action** (all from logged data):
 
@@ -39,7 +39,7 @@ run on the test period. Two tiers: *automatic* (tie_persisted ∧ repeat_interac
 ∧ new_context) and *manual* (annotator-labelled with direct evidence). Both are
 reported separately. Manual labels are made blind to policy rankings.
 
-## E2. Features at time t (leakage-safe)
+## E2. Features at time t (leakage-safe) — metadata version BUILT 2026-09-26 (`src/features/exposure_features.py`); content-aware version pending
 
 Every feature is computed by `src.evaluation.leakage.features_at(t, …)`. Per candidate:
 
@@ -60,7 +60,7 @@ Every feature is computed by `src.evaluation.leakage.features_at(t, …)`. Per c
   normalized. Explicitly a proxy; ablated.
 - `cost`: expected reply length (tokens) for messages, travel/time for events; unit-scaled.
 
-## E3. Policies and evaluation (Phase 6, 7)
+## E3. Policies and evaluation (Phase 6, 7) — VALIDATION RUN DONE 2026-09-26; test gated on the annotation freeze
 
 Policies: `src/policies/scoring.py` (random, popularity, relevance, clone,
 ε-greedy, novelty, UCB, Thompson, hybrid). Weights of the hybrid are tuned on the

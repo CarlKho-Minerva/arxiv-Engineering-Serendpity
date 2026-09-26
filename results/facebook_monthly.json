@@ -1,0 +1,1187 @@
+{
+"generated": "2026-09-26T19:38:45+00:00",
+"status": "EXPLORATORY; counts only; names hashed and not written here",
+"totals": {
+"friends": 2195,
+"event_invitations": 94,
+"events_joined": 43,
+"events_interested": 66
+},
+"monthly": {
+"2011-10": {
+"friends_added": 8
+},
+"2011-11": {
+"friends_added": 5,
+"requests_rejected": 1,
+"requests_sent_pending": 1
+},
+"2011-12": {
+"friends_added": 2
+},
+"2012-01": {
+"friends_added": 1
+},
+"2012-02": {
+"friends_added": 2
+},
+"2012-03": {
+"friends_added": 10
+},
+"2012-04": {
+"friends_added": 8,
+"requests_rejected": 2,
+"friends_removed": 1
+},
+"2012-05": {
+"friends_added": 3,
+"requests_rejected": 1,
+"requests_sent_pending": 1
+},
+"2012-06": {
+"friends_added": 1,
+"requests_sent_pending": 1,
+"groups_joined": 1
+},
+"2012-07": {
+"friends_added": 8,
+"requests_sent_pending": 1,
+"groups_joined": 1,
+"group_posts": 15
+},
+"2012-08": {
+"friends_added": 4,
+"requests_rejected": 1
+},
+"2012-09": {
+"friends_added": 4,
+"requests_sent_pending": 2,
+"groups_joined": 1
+},
+"2012-10": {
+"friends_added": 5,
+"requests_rejected": 1
+},
+"2012-11": {
+"friends_added": 1
+},
+"2013-02": {
+"friends_added": 3
+},
+"2013-03": {
+"friends_added": 4,
+"requests_rejected": 2,
+"friends_removed": 2
+},
+"2013-04": {
+"friends_added": 3,
+"requests_rejected": 5,
+"requests_sent_pending": 1
+},
+"2013-05": {
+"friends_added": 2
+},
+"2013-06": {
+"friends_added": 1
+},
+"2013-07": {
+"requests_rejected": 2
+},
+"2013-08": {
+"friends_added": 3
+},
+"2013-10": {
+"friends_added": 1,
+"requests_rejected": 1
+},
+"2013-11": {
+"requests_rejected": 1
+},
+"2013-12": {
+"friends_added": 1,
+"requests_rejected": 2
+},
+"2014-01": {
+"friends_added": 1
+},
+"2014-02": {
+"friends_added": 1
+},
+"2014-03": {
+"friends_added": 3,
+"friends_removed": 1,
+"groups_joined": 4,
+"group_comments": 9
+},
+"2014-04": {
+"friends_added": 4,
+"requests_rejected": 2,
+"groups_joined": 1,
+"group_comments": 39,
+"group_posts": 15
+},
+"2014-05": {
+"friends_added": 3,
+"group_comments": 12,
+"group_posts": 8
+},
+"2014-06": {
+"friends_added": 1,
+"group_posts": 1
+},
+"2014-07": {
+"friends_added": 2,
+"group_comments": 1,
+"group_posts": 1
+},
+"2014-08": {
+"friends_added": 8,
+"requests_rejected": 2,
+"group_comments": 4
+},
+"2014-09": {
+"friends_added": 1,
+"groups_joined": 1,
+"group_comments": 2,
+"group_posts": 3
+},
+"2014-10": {
+"friends_added": 1,
+"groups_joined": 2,
+"group_comments": 3
+},
+"2014-11": {
+"friends_added": 8,
+"requests_sent_pending": 1,
+"group_comments": 2,
+"group_posts": 3
+},
+"2014-12": {
+"friends_added": 2,
+"groups_joined": 1
+},
+"2015-01": {
+"friends_added": 3,
+"requests_sent_pending": 1
+},
+"2015-02": {
+"friends_added": 4,
+"requests_rejected": 1,
+"groups_joined": 2,
+"group_comments": 1,
+"group_posts": 1
+},
+"2015-03": {
+"friends_added": 4,
+"requests_sent_pending": 2,
+"groups_joined": 1,
+"group_comments": 32
+},
+"2015-04": {
+"friends_added": 7,
+"group_comments": 3
+},
+"2015-05": {
+"friends_added": 5,
+"requests_sent_pending": 1,
+"group_comments": 39,
+"group_posts": 1
+},
+"2015-06": {
+"friends_added": 2,
+"group_comments": 5,
+"group_posts": 2
+},
+"2015-07": {
+"friends_added": 5,
+"group_comments": 15,
+"group_posts": 2
+},
+"2015-08": {
+"friends_added": 2,
+"requests_rejected": 1,
+"group_posts": 1
+},
+"2015-09": {
+"friends_added": 3,
+"group_comments": 19
+},
+"2015-10": {
+"friends_added": 5,
+"groups_joined": 1,
+"group_comments": 1
+},
+"2015-11": {
+"friends_added": 2,
+"requests_sent_pending": 1,
+"friends_removed": 1,
+"group_comments": 1,
+"group_posts": 1
+},
+"2015-12": {
+"friends_added": 4,
+"group_comments": 10
+},
+"2016-01": {
+"friends_added": 1,
+"requests_sent_pending": 1,
+"groups_joined": 2,
+"group_comments": 10,
+"group_posts": 4,
+"event_invitations_by_event_start": 1
+},
+"2016-02": {
+"friends_added": 7,
+"groups_joined": 1
+},
+"2016-03": {
+"friends_added": 7,
+"event_invitations_by_event_start": 3
+},
+"2016-04": {
+"friends_added": 2,
+"friends_removed": 1
+},
+"2016-05": {
+"friends_added": 2,
+"events_joined": 1,
+"event_invitations_by_event_start": 1
+},
+"2016-06": {
+"friends_added": 24,
+"requests_sent_pending": 2,
+"friends_removed": 1,
+"event_invitations_by_event_start": 4
+},
+"2016-07": {
+"friends_added": 21,
+"requests_rejected": 2,
+"groups_joined": 1
+},
+"2016-08": {
+"friends_added": 3
+},
+"2016-09": {
+"friends_added": 9
+},
+"2016-10": {
+"friends_added": 6
+},
+"2016-11": {
+"friends_added": 12,
+"requests_rejected": 2,
+"requests_sent_pending": 1
+},
+"2016-12": {
+"friends_added": 15,
+"friends_removed": 1,
+"groups_joined": 1,
+"events_interested": 1,
+"event_invitations_by_event_start": 1
+},
+"2017-01": {
+"friends_added": 4,
+"groups_joined": 2,
+"group_comments": 3
+},
+"2017-02": {
+"friends_added": 7,
+"requests_sent_pending": 1,
+"groups_joined": 1,
+"group_comments": 1
+},
+"2017-03": {
+"friends_added": 17,
+"requests_rejected": 1,
+"friends_removed": 2,
+"group_comments": 1
+},
+"2017-04": {
+"friends_added": 20,
+"requests_rejected": 2,
+"requests_sent_pending": 2,
+"friends_removed": 2,
+"groups_joined": 2,
+"group_comments": 1,
+"group_posts": 3
+},
+"2017-05": {
+"friends_added": 6,
+"requests_rejected": 4,
+"requests_sent_pending": 1,
+"friends_removed": 1,
+"groups_joined": 3,
+"group_comments": 95,
+"group_posts": 13
+},
+"2017-06": {
+"friends_added": 15,
+"requests_rejected": 4,
+"groups_joined": 1,
+"group_comments": 73,
+"group_posts": 18,
+"events_interested": 1
+},
+"2017-07": {
+"friends_added": 15,
+"requests_rejected": 4,
+"groups_joined": 1,
+"group_comments": 35,
+"group_posts": 3,
+"events_joined": 1,
+"events_interested": 1
+},
+"2017-08": {
+"friends_added": 16,
+"groups_joined": 4,
+"group_comments": 28,
+"group_posts": 3
+},
+"2017-09": {
+"friends_added": 14,
+"requests_rejected": 3,
+"requests_sent_pending": 3,
+"friends_removed": 1,
+"group_comments": 31,
+"group_posts": 3,
+"events_joined": 1
+},
+"2017-10": {
+"friends_added": 30,
+"requests_rejected": 1,
+"requests_sent_pending": 1,
+"groups_joined": 2,
+"group_comments": 40,
+"group_posts": 7,
+"events_interested": 3
+},
+"2017-11": {
+"friends_added": 21,
+"requests_rejected": 3,
+"groups_joined": 2,
+"group_comments": 30,
+"group_posts": 2,
+"events_interested": 1
+},
+"2017-12": {
+"friends_added": 19,
+"requests_rejected": 5,
+"groups_joined": 2,
+"group_comments": 38,
+"group_posts": 3,
+"events_interested": 2
+},
+"2018-01": {
+"friends_added": 9,
+"requests_rejected": 7,
+"requests_sent_pending": 1,
+"friends_removed": 1,
+"groups_joined": 1,
+"group_comments": 39,
+"group_posts": 5,
+"events_joined": 1
+},
+"2018-02": {
+"friends_added": 14,
+"requests_rejected": 4,
+"friends_removed": 1,
+"group_comments": 23,
+"group_posts": 4,
+"events_interested": 3
+},
+"2018-03": {
+"friends_added": 11,
+"requests_rejected": 6,
+"friends_removed": 4,
+"groups_joined": 5,
+"group_comments": 10,
+"group_posts": 1
+},
+"2018-04": {
+"friends_added": 18,
+"requests_rejected": 4,
+"requests_sent_pending": 1,
+"friends_removed": 1,
+"groups_joined": 7,
+"group_comments": 59,
+"group_posts": 2
+},
+"2018-05": {
+"friends_added": 7,
+"requests_rejected": 1,
+"groups_joined": 3,
+"group_comments": 29,
+"events_joined": 1
+},
+"2018-06": {
+"friends_added": 36,
+"requests_rejected": 6,
+"requests_sent_pending": 3,
+"friends_removed": 1,
+"groups_joined": 12,
+"group_comments": 10,
+"events_joined": 1,
+"events_interested": 2
+},
+"2018-07": {
+"friends_added": 26,
+"requests_received_pending": 1,
+"requests_rejected": 12,
+"requests_sent_pending": 2,
+"groups_joined": 3,
+"group_comments": 7,
+"events_interested": 2
+},
+"2018-08": {
+"friends_added": 55,
+"requests_received_pending": 2,
+"requests_rejected": 7,
+"requests_sent_pending": 3,
+"groups_joined": 4,
+"group_comments": 4,
+"events_joined": 2,
+"events_interested": 1
+},
+"2018-09": {
+"friends_added": 23,
+"requests_received_pending": 1,
+"requests_rejected": 2,
+"friends_removed": 3,
+"groups_joined": 3,
+"group_comments": 3,
+"events_joined": 3,
+"events_interested": 3
+},
+"2018-10": {
+"friends_added": 79,
+"requests_received_pending": 2,
+"requests_rejected": 1,
+"requests_sent_pending": 3,
+"groups_joined": 6,
+"group_comments": 13,
+"events_joined": 3,
+"events_interested": 3
+},
+"2018-11": {
+"friends_added": 27,
+"requests_received_pending": 5,
+"requests_rejected": 1,
+"requests_sent_pending": 3,
+"friends_removed": 2,
+"groups_joined": 2,
+"group_comments": 4,
+"events_interested": 1
+},
+"2018-12": {
+"friends_added": 15,
+"requests_received_pending": 4,
+"requests_rejected": 3,
+"requests_sent_pending": 2,
+"friends_removed": 1,
+"groups_joined": 4
+},
+"2019-01": {
+"friends_added": 11,
+"requests_received_pending": 3,
+"requests_sent_pending": 1,
+"friends_removed": 1,
+"groups_joined": 1,
+"group_comments": 10,
+"events_joined": 1,
+"events_interested": 4
+},
+"2019-02": {
+"friends_added": 27,
+"requests_received_pending": 11,
+"requests_rejected": 1,
+"groups_joined": 6,
+"group_comments": 4,
+"group_posts": 3,
+"events_interested": 8,
+"event_invitations_by_event_start": 2
+},
+"2019-03": {
+"friends_added": 25,
+"requests_received_pending": 11,
+"requests_sent_pending": 1,
+"event_invitations_by_event_start": 2
+},
+"2019-04": {
+"friends_added": 18,
+"requests_received_pending": 13,
+"requests_sent_pending": 1,
+"groups_joined": 2,
+"events_interested": 4
+},
+"2019-05": {
+"friends_added": 31,
+"requests_received_pending": 10,
+"requests_rejected": 1,
+"group_comments": 7,
+"events_interested": 3
+},
+"2019-06": {
+"friends_added": 32,
+"requests_received_pending": 11,
+"requests_rejected": 1,
+"requests_sent_pending": 3,
+"groups_joined": 1,
+"events_joined": 1
+},
+"2019-07": {
+"friends_added": 23,
+"requests_received_pending": 11,
+"requests_rejected": 1,
+"groups_joined": 2,
+"events_joined": 2,
+"events_interested": 1,
+"event_invitations_by_event_start": 2
+},
+"2019-08": {
+"friends_added": 12,
+"requests_received_pending": 3,
+"requests_rejected": 2,
+"requests_sent_pending": 1,
+"friends_removed": 1,
+"groups_joined": 1,
+"events_interested": 2
+},
+"2019-09": {
+"friends_added": 40,
+"requests_received_pending": 11,
+"requests_sent_pending": 2,
+"friends_removed": 2,
+"groups_joined": 2,
+"group_comments": 6,
+"events_joined": 1,
+"events_interested": 4
+},
+"2019-10": {
+"friends_added": 27,
+"requests_received_pending": 23,
+"requests_rejected": 1,
+"requests_sent_pending": 2,
+"groups_joined": 1,
+"group_comments": 2,
+"events_interested": 1
+},
+"2019-11": {
+"friends_added": 48,
+"requests_received_pending": 23,
+"requests_sent_pending": 1,
+"friends_removed": 1,
+"groups_joined": 3,
+"group_comments": 3,
+"events_interested": 2
+},
+"2019-12": {
+"friends_added": 25,
+"requests_received_pending": 17,
+"requests_sent_pending": 4,
+"group_comments": 2,
+"events_joined": 1
+},
+"2020-01": {
+"friends_added": 19,
+"requests_received_pending": 6,
+"requests_sent_pending": 1,
+"groups_joined": 1,
+"group_comments": 4,
+"group_posts": 2,
+"events_interested": 2
+},
+"2020-02": {
+"friends_added": 11,
+"requests_received_pending": 6,
+"group_comments": 3,
+"events_joined": 1
+},
+"2020-03": {
+"friends_added": 13,
+"requests_received_pending": 8,
+"requests_rejected": 1,
+"requests_sent_pending": 1,
+"friends_removed": 2,
+"groups_joined": 5,
+"group_comments": 9
+},
+"2020-04": {
+"friends_added": 9,
+"requests_received_pending": 6,
+"requests_sent_pending": 2,
+"groups_joined": 13,
+"group_comments": 19,
+"group_posts": 6
+},
+"2020-05": {
+"friends_added": 72,
+"requests_received_pending": 11,
+"requests_sent_pending": 23,
+"groups_joined": 16,
+"group_comments": 45,
+"group_posts": 20,
+"events_interested": 1,
+"event_invitations_by_event_start": 1
+},
+"2020-06": {
+"friends_added": 57,
+"requests_received_pending": 25,
+"requests_rejected": 1,
+"requests_sent_pending": 2,
+"friends_removed": 2,
+"groups_joined": 9,
+"group_comments": 27,
+"group_posts": 7,
+"events_joined": 1,
+"events_interested": 2
+},
+"2020-07": {
+"friends_added": 30,
+"requests_received_pending": 18,
+"requests_rejected": 1,
+"friends_removed": 3,
+"groups_joined": 3,
+"group_comments": 7,
+"group_posts": 3
+},
+"2020-08": {
+"friends_added": 28,
+"requests_received_pending": 6,
+"requests_rejected": 2,
+"requests_sent_pending": 3,
+"groups_joined": 6,
+"group_comments": 14,
+"group_posts": 7,
+"event_invitations_by_event_start": 1
+},
+"2020-09": {
+"friends_added": 16,
+"requests_received_pending": 12,
+"friends_removed": 2,
+"groups_joined": 4,
+"group_comments": 5
+},
+"2020-10": {
+"friends_added": 39,
+"requests_received_pending": 1,
+"requests_sent_pending": 3,
+"groups_joined": 8,
+"group_comments": 14,
+"group_posts": 1,
+"events_interested": 1
+},
+"2020-11": {
+"friends_added": 13,
+"requests_received_pending": 11,
+"requests_sent_pending": 4,
+"groups_joined": 8,
+"group_comments": 23,
+"group_posts": 3,
+"events_joined": 1
+},
+"2020-12": {
+"friends_added": 8,
+"requests_received_pending": 4,
+"groups_joined": 4,
+"group_comments": 13,
+"group_posts": 5,
+"events_interested": 1
+},
+"2021-01": {
+"friends_added": 6,
+"requests_received_pending": 3,
+"requests_sent_pending": 3,
+"friends_removed": 1,
+"groups_joined": 5,
+"group_comments": 12,
+"group_posts": 5
+},
+"2021-02": {
+"friends_added": 14,
+"requests_received_pending": 6,
+"requests_rejected": 1,
+"groups_joined": 3,
+"group_comments": 34,
+"group_posts": 13
+},
+"2021-03": {
+"friends_added": 49,
+"requests_received_pending": 9,
+"requests_sent_pending": 7,
+"groups_joined": 3,
+"group_comments": 29,
+"group_posts": 3
+},
+"2021-04": {
+"friends_added": 12,
+"requests_received_pending": 3,
+"requests_rejected": 1,
+"requests_sent_pending": 2,
+"groups_joined": 2,
+"group_comments": 11,
+"group_posts": 1,
+"events_joined": 5,
+"events_interested": 2,
+"event_invitations_by_event_start": 4
+},
+"2021-05": {
+"friends_added": 13,
+"requests_received_pending": 10,
+"requests_sent_pending": 2,
+"groups_joined": 4,
+"group_comments": 19,
+"group_posts": 1,
+"events_joined": 1
+},
+"2021-06": {
+"friends_added": 12,
+"requests_received_pending": 9,
+"groups_joined": 4,
+"group_comments": 7,
+"event_invitations_by_event_start": 1
+},
+"2021-07": {
+"friends_added": 14,
+"requests_received_pending": 4,
+"requests_sent_pending": 3,
+"groups_joined": 6,
+"group_comments": 2,
+"event_invitations_by_event_start": 1
+},
+"2021-08": {
+"friends_added": 18,
+"requests_received_pending": 7,
+"requests_sent_pending": 4,
+"groups_joined": 5,
+"group_comments": 9
+},
+"2021-09": {
+"friends_added": 13,
+"requests_received_pending": 5,
+"requests_rejected": 1,
+"requests_sent_pending": 1,
+"friends_removed": 1,
+"groups_joined": 7,
+"group_comments": 7,
+"events_joined": 2,
+"events_interested": 1
+},
+"2021-10": {
+"friends_added": 4,
+"requests_received_pending": 2,
+"requests_sent_pending": 1,
+"groups_joined": 5,
+"group_comments": 19,
+"group_posts": 4,
+"events_joined": 3,
+"events_interested": 2,
+"event_invitations_by_event_start": 1
+},
+"2021-11": {
+"friends_added": 14,
+"requests_received_pending": 2,
+"requests_sent_pending": 1,
+"groups_joined": 6,
+"group_comments": 24,
+"group_posts": 3
+},
+"2021-12": {
+"friends_added": 20,
+"requests_received_pending": 19,
+"requests_sent_pending": 1,
+"friends_removed": 1,
+"groups_joined": 1,
+"group_comments": 9,
+"group_posts": 4
+},
+"2022-01": {
+"friends_added": 11,
+"requests_received_pending": 3,
+"requests_sent_pending": 3,
+"groups_joined": 1,
+"group_comments": 3,
+"events_joined": 1
+},
+"2022-02": {
+"friends_added": 6,
+"requests_received_pending": 4,
+"requests_rejected": 1,
+"friends_removed": 1,
+"groups_joined": 1,
+"group_comments": 5
+},
+"2022-03": {
+"friends_added": 23,
+"requests_received_pending": 2,
+"requests_sent_pending": 1,
+"groups_joined": 2,
+"group_comments": 75
+},
+"2022-04": {
+"friends_added": 15,
+"requests_received_pending": 3,
+"requests_sent_pending": 4,
+"friends_removed": 1,
+"groups_joined": 4,
+"group_comments": 9
+},
+"2022-05": {
+"friends_added": 40,
+"requests_received_pending": 3,
+"requests_sent_pending": 2,
+"friends_removed": 1,
+"group_comments": 4,
+"group_posts": 3,
+"events_joined": 4,
+"event_invitations_by_event_start": 1
+},
+"2022-06": {
+"friends_added": 12,
+"requests_received_pending": 8,
+"requests_sent_pending": 2,
+"groups_joined": 5,
+"group_comments": 4,
+"group_posts": 2,
+"event_invitations_by_event_start": 1
+},
+"2022-07": {
+"friends_added": 15,
+"requests_received_pending": 5,
+"requests_sent_pending": 2,
+"groups_joined": 2,
+"group_comments": 3,
+"events_joined": 1
+},
+"2022-08": {
+"friends_added": 12,
+"requests_received_pending": 2,
+"requests_sent_pending": 2,
+"groups_joined": 1,
+"events_joined": 1
+},
+"2022-09": {
+"friends_added": 11,
+"requests_received_pending": 5,
+"requests_sent_pending": 2,
+"groups_joined": 7,
+"group_comments": 1
+},
+"2022-10": {
+"friends_added": 18,
+"requests_received_pending": 7,
+"groups_joined": 2,
+"group_comments": 2
+},
+"2022-11": {
+"friends_added": 14,
+"requests_received_pending": 4,
+"requests_sent_pending": 1,
+"groups_joined": 1,
+"group_comments": 1
+},
+"2022-12": {
+"friends_added": 25,
+"requests_received_pending": 1,
+"requests_sent_pending": 4,
+"groups_joined": 2
+},
+"2023-01": {
+"friends_added": 13,
+"requests_received_pending": 1,
+"requests_sent_pending": 2,
+"groups_joined": 2,
+"event_invitations_by_event_start": 1
+},
+"2023-02": {
+"friends_added": 73,
+"requests_received_pending": 4,
+"requests_rejected": 2,
+"requests_sent_pending": 99,
+"friends_removed": 3,
+"groups_joined": 1,
+"event_invitations_by_event_start": 2
+},
+"2023-03": {
+"friends_added": 23,
+"requests_received_pending": 1,
+"requests_rejected": 1,
+"friends_removed": 1,
+"groups_joined": 1,
+"event_invitations_by_event_start": 1
+},
+"2023-04": {
+"friends_added": 10,
+"requests_received_pending": 3,
+"requests_sent_pending": 1,
+"friends_removed": 2,
+"event_invitations_by_event_start": 1
+},
+"2023-05": {
+"friends_added": 7,
+"requests_received_pending": 3,
+"groups_joined": 4,
+"group_comments": 3,
+"event_invitations_by_event_start": 1
+},
+"2023-06": {
+"friends_added": 19,
+"requests_received_pending": 18,
+"groups_joined": 2,
+"event_invitations_by_event_start": 1
+},
+"2023-07": {
+"friends_added": 5,
+"requests_sent_pending": 1,
+"groups_joined": 1,
+"event_invitations_by_event_start": 1
+},
+"2023-08": {
+"friends_added": 2,
+"requests_received_pending": 3,
+"groups_joined": 1,
+"event_invitations_by_event_start": 1
+},
+"2023-09": {
+"friends_added": 1,
+"requests_received_pending": 4,
+"requests_sent_pending": 1,
+"groups_joined": 1,
+"event_invitations_by_event_start": 1
+},
+"2023-10": {
+"friends_added": 14,
+"requests_received_pending": 11,
+"requests_sent_pending": 5,
+"groups_joined": 3,
+"group_comments": 3,
+"event_invitations_by_event_start": 1
+},
+"2023-11": {
+"friends_added": 4,
+"requests_received_pending": 1,
+"event_invitations_by_event_start": 1
+},
+"2023-12": {
+"friends_added": 6,
+"requests_received_pending": 2,
+"requests_sent_pending": 5,
+"friends_removed": 1,
+"groups_joined": 2,
+"group_comments": 4,
+"event_invitations_by_event_start": 3
+},
+"2024-01": {
+"friends_added": 5,
+"friends_removed": 4,
+"groups_joined": 1,
+"event_invitations_by_event_start": 1
+},
+"2024-02": {
+"friends_added": 3,
+"requests_sent_pending": 1,
+"event_invitations_by_event_start": 1
+},
+"2024-03": {
+"friends_added": 11,
+"requests_sent_pending": 5,
+"friends_removed": 3,
+"groups_joined": 1,
+"event_invitations_by_event_start": 2
+},
+"2024-04": {
+"friends_added": 9,
+"requests_sent_pending": 6,
+"groups_joined": 1,
+"event_invitations_by_event_start": 2
+},
+"2024-05": {
+"friends_added": 14,
+"requests_received_pending": 7,
+"requests_sent_pending": 3,
+"groups_joined": 3,
+"events_interested": 1,
+"event_invitations_by_event_start": 2
+},
+"2024-06": {
+"friends_added": 10,
+"requests_received_pending": 1,
+"requests_sent_pending": 4,
+"groups_joined": 3,
+"event_invitations_by_event_start": 1
+},
+"2024-07": {
+"friends_added": 28,
+"requests_received_pending": 6,
+"requests_sent_pending": 11,
+"friends_removed": 1,
+"groups_joined": 3,
+"event_invitations_by_event_start": 2
+},
+"2024-08": {
+"friends_added": 16,
+"requests_received_pending": 1,
+"requests_sent_pending": 3,
+"groups_joined": 3,
+"group_comments": 1,
+"event_invitations_by_event_start": 2
+},
+"2024-09": {
+"friends_added": 6,
+"requests_received_pending": 5,
+"requests_sent_pending": 1,
+"groups_joined": 3,
+"event_invitations_by_event_start": 2
+},
+"2024-10": {
+"friends_added": 3,
+"requests_received_pending": 1,
+"requests_sent_pending": 1,
+"groups_joined": 2,
+"event_invitations_by_event_start": 3
+},
+"2024-11": {
+"friends_added": 2,
+"requests_received_pending": 2,
+"event_invitations_by_event_start": 2
+},
+"2024-12": {
+"friends_added": 16,
+"requests_received_pending": 4,
+"requests_sent_pending": 5,
+"groups_joined": 8,
+"event_invitations_by_event_start": 3
+},
+"2025-01": {
+"friends_added": 11,
+"requests_received_pending": 1,
+"requests_sent_pending": 3,
+"groups_joined": 3,
+"event_invitations_by_event_start": 1
+},
+"2025-02": {
+"friends_added": 6,
+"requests_received_pending": 4,
+"requests_sent_pending": 3,
+"groups_joined": 3,
+"event_invitations_by_event_start": 2
+},
+"2025-03": {
+"friends_added": 8,
+"requests_received_pending": 4,
+"requests_sent_pending": 5,
+"groups_joined": 3,
+"events_joined": 2,
+"event_invitations_by_event_start": 2
+},
+"2025-04": {
+"friends_added": 9,
+"requests_sent_pending": 9,
+"groups_joined": 2,
+"group_comments": 1,
+"event_invitations_by_event_start": 2
+},
+"2025-05": {
+"friends_added": 17,
+"requests_received_pending": 6,
+"requests_sent_pending": 5,
+"groups_joined": 2,
+"group_comments": 1,
+"group_posts": 1,
+"event_invitations_by_event_start": 1
+},
+"2025-06": {
+"friends_added": 7,
+"groups_joined": 3,
+"event_invitations_by_event_start": 2
+},
+"2025-07": {
+"friends_added": 5,
+"requests_received_pending": 3,
+"requests_sent_pending": 2,
+"groups_joined": 1,
+"event_invitations_by_event_start": 1
+},
+"2025-08": {
+"friends_added": 8,
+"requests_received_pending": 2,
+"requests_sent_pending": 1,
+"groups_joined": 5,
+"group_comments": 1,
+"event_invitations_by_event_start": 1
+},
+"2025-09": {
+"friends_added": 9,
+"requests_sent_pending": 3,
+"groups_joined": 6,
+"event_invitations_by_event_start": 3
+},
+"2025-10": {
+"friends_added": 1,
+"requests_received_pending": 4,
+"groups_joined": 2,
+"group_comments": 2,
+"event_invitations_by_event_start": 1
+},
+"2025-11": {
+"requests_received_pending": 1,
+"requests_sent_pending": 1,
+"groups_joined": 4,
+"event_invitations_by_event_start": 1
+},
+"2025-12": {
+"friends_added": 2,
+"requests_received_pending": 7,
+"requests_sent_pending": 5,
+"groups_joined": 5,
+"event_invitations_by_event_start": 2
+},
+"2026-01": {
+"friends_added": 1,
+"requests_received_pending": 2,
+"requests_sent_pending": 1,
+"groups_joined": 2,
+"event_invitations_by_event_start": 1
+},
+"2026-02": {
+"friends_added": 2,
+"requests_received_pending": 2,
+"event_invitations_by_event_start": 1
+},
+"2026-03": {
+"friends_added": 2,
+"requests_received_pending": 1,
+"group_comments": 2,
+"event_invitations_by_event_start": 1
+},
+"2026-04": {
+"friends_added": 4,
+"requests_received_pending": 1,
+"groups_joined": 1,
+"event_invitations_by_event_start": 2
+},
+"2026-05": {
+"requests_received_pending": 5,
+"requests_sent_pending": 1,
+"groups_joined": 1,
+"event_invitations_by_event_start": 1
+},
+"2026-06": {
+"requests_received_pending": 1,
+"event_invitations_by_event_start": 2
+},
+"2026-07": {
+"friends_added": 4,
+"requests_received_pending": 5,
+"friends_removed": 1,
+"groups_joined": 2,
+"event_invitations_by_event_start": 1
+},
+"2026-08": {
+"requests_received_pending": 4,
+"groups_joined": 1
+},
+"2026-09": {
+"event_invitations_by_event_start": 1
+}
+}
+}

@@ -119,6 +119,8 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--real", type=Path, default=None)
     ap.add_argument("--seed", type=int, default=0)
+    ap.add_argument("--split-eval", choices=["val", "test"], default="test",
+                    help="evaluate on val while the annotation protocol is unfrozen; test only after the freeze")
     a = ap.parse_args()
     rng = np.random.default_rng(a.seed)
     if a.real:
@@ -133,14 +135,15 @@ def main():
         df = load_synthetic(); synthetic = True
 
     policies = dict(DEFAULT_POLICIES)
-    if (df["split"] == "val").any():
-        w = tune_hybrid(df[df["split"] == "val"], rng)
+    tune_split = "train" if a.split_eval == "val" else "val"   # never tune on the split you report
+    if (df["split"] == tune_split).any():
+        w = tune_hybrid(df[df["split"] == tune_split], rng)
         policies["hybrid"] = hybrid_policy(w)
         tuned = w.as_dict()
     else:
         tuned = Weights(relevance=1.0, uncertainty=0.5, novelty=0.5, info_gain=0.5, option_value=0.5, cost=0.25).as_dict()
         policies["hybrid"] = hybrid_policy(Weights(**tuned))
-    test = df[df["split"] == "test"]
+    test = df[df["split"] == a.split_eval]
     rows = []
     for day, d in test.groupby("day"):
         if d[LABEL].sum() == 0:
@@ -150,24 +153,28 @@ def main():
         for row in evaluate_day(d.reset_index(drop=True), pols, rng):
             row["day"] = day; rows.append(row)
     per_day = pd.DataFrame(rows)
+    set_sizes = test.groupby("day").size()
     metrics = {m: bootstrap(per_day, m, rng) for m in ["mrr"] + [f"{s}@{k}" for s in ("recall", "ndcg", "coverage", "novelty") for k in KS]}
     out = {"synthetic": synthetic,
+           "eval_split": a.split_eval,
            "note": "SYNTHETIC FIXTURE: numbers illustrate the pipeline only. Not a result." if synthetic
-                   else "Real retrospective evaluation on the chronological test split.",
+                   else f"Real retrospective evaluation on the chronological {a.split_eval} split (weak-tie exposures, Tier A labels).",
            "generated": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"),
            "n_test_days_with_positives": int(per_day["day"].nunique()),
-           "hybrid_weights": tuned, "ks": list(KS), "metrics": metrics}
+           "candidate_set_size": {"mean": float(set_sizes.mean()), "median": float(set_sizes.median()),
+                                  "p90": float(set_sizes.quantile(.9)), "max": int(set_sizes.max())},
+           "hybrid_weights": tuned, "hybrid_tuned_on": tune_split if not synthetic else None, "ks": list(KS), "metrics": metrics}
     (ROOT / "results").mkdir(exist_ok=True)
-    (ROOT / "results" / "metrics.json").write_text(json.dumps(out, indent=1))
+    (ROOT / "results" / ("metrics.json" if synthetic else f"metrics_{a.split_eval}.json")).write_text(json.dumps(out, indent=1))
     # markdown table
-    lines = [f"# Retrospective serendipity — {'SYNTHETIC FIXTURE (not a result)' if synthetic else 'test split'}", "",
-             f"generated {out['generated']}; days with positives: {out['n_test_days_with_positives']}; hybrid weights {tuned}", "",
+    lines = [f"# Retrospective serendipity — {'SYNTHETIC FIXTURE (not a result)' if synthetic else a.split_eval + ' split (real, Tier A labels)'}", "",
+             f"generated {out['generated']}; weeks with positives: {out['n_test_days_with_positives']}; candidate set size mean {out['candidate_set_size']['mean']:.1f} / median {out['candidate_set_size']['median']:.0f} / p90 {out['candidate_set_size']['p90']:.0f}; hybrid weights {tuned} (tuned on {out.get('hybrid_tuned_on')})", "",
              "| policy | " + " | ".join(f"recall@{k}" for k in KS) + " | MRR | coverage@5 | novelty@5 |", "|---|" + "---|" * (len(KS) + 3)]
     for p in per_day["policy"].unique():
         cells = [f"{metrics[f'recall@{k}'][p]['mean']:.3f} [{metrics[f'recall@{k}'][p]['ci95'][0]:.2f},{metrics[f'recall@{k}'][p]['ci95'][1]:.2f}]" for k in KS]
         lines.append(f"| {p} | " + " | ".join(cells) + f" | {metrics['mrr'][p]['mean']:.3f} | {metrics['coverage@5'][p]['mean']:.2f} | {metrics['novelty@5'][p]['mean']:.2f} |")
     (ROOT / "results" / "tables").mkdir(exist_ok=True, parents=True)
-    (ROOT / "results" / "tables" / "retrospective.md").write_text("\n".join(lines) + "\n")
+    (ROOT / "results" / "tables" / ("retrospective_synthetic.md" if synthetic else f"retrospective_{a.split_eval}.md")).write_text("\n".join(lines) + "\n")
     print("\n".join(lines))
 
 
