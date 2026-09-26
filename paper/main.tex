@@ -1,0 +1,120 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{natbib}
+\usepackage{microtype}
+\graphicspath{{figures/}}
+
+% ---- status macros: every claim in this draft is tagged ----
+\newcommand{\measured}[1]{{\color{black}#1}}
+\newcommand{\proposed}[1]{{\color{blue!60!black}[Proposed: #1]}}
+\newcommand{\hypothesis}[1]{{\color{purple!70!black}[Hypothesis: #1]}}
+\newcommand{\todo}[1]{{\color{red}[TODO: #1]}}
+
+\title{Algorithmic Mirrors: Engineering Serendipity in Personal Agents\\Under Partial Observability\\
+\large A Longitudinal Single-Subject Study of Behavioral Cloning, Exploration, and Counterfactual Recommendation\\
+\normalsize \todo{title not final; lock after results}}
+\author{Carl Kho\\ \small Somach Systems, Inc.\ \todo{affiliation wording per counsel}}
+\date{Draft skeleton, \today}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+\todo{Write only after Sections 8--11 contain measured results.}
+A behavioral clone answers ``what would I do?''; an augmenting agent must answer ``what am I failing to consider?''
+We argue these are different objects, formalize the second as an exploration policy over a belief state, and test
+the difference retrospectively on one subject's fifteen-year record of logged exposures and choices.
+\measured{The clone half is measured: a personal LoRA raises held-out 5-way next-action prediction from 28.0\% to 37.8\% (chance 20\%; +9.8 points, 95\% CI [6.8, 13.4], gain on 20 of 21 test days).}
+\proposed{The exploration half is a pre-registered retrospective ranking experiment whose falsifier is stated in Section 7.}
+\end{abstract}
+
+\section{Introduction}
+\todo{}
+Prediction asks what the subject will do. Augmentation asks what possibilities the subject is currently failing to consider.
+The behavioral clone models the first; the exploration mechanism exists because the second question is different.
+
+\section{Motivation and Problem Setting}
+\todo{Progression A--G from the research brief, written as motivation, not evidence.}
+\hypothesis{Many consequential transitions arose from exposures a then-current preference model would have ranked low.}
+
+\section{Related Work}
+\paragraph{Belief-state control and Bayes-adaptive RL.} \todo{\citep{kaelbling1998planning,duff2002optimal,guez2012efficient}}
+\paragraph{Contextual bandits and exploration.} \todo{\citep{auer2002finite,li2010contextual,russo2018tutorial,thompson1933likelihood}}
+\paragraph{Intrinsic motivation, curiosity, information gain.} \todo{\citep{houlsby2011bayesian,pathak2017curiosity,schmidhuber2010formal,klyubin2005empowerment}}
+\paragraph{Predictive state representations.} \todo{\citep{littman2002predictive,singh2004predictive}}
+\paragraph{The era of experience and continuing RL.} \todo{\citep{silver2025era,sutton2018reinforcement}}
+\paragraph{Recommender systems, user embeddings, feedback loops, serendipity.} \todo{\citep{chaney2018algorithmic,kotkov2016survey,ziegler2005improving}}
+\paragraph{Behavioral cloning and imitation.} \todo{\citep{pomerleau1991efficient,ross2011reduction}}
+\paragraph{Off-policy and counterfactual evaluation.} \todo{\citep{li2011unbiased,swaminathan2015counterfactual}}
+\paragraph{Lifelogging and quantified self.} \todo{\citep{gurrin2014lifelogging}}
+
+\section{Dataset and Longitudinal Setting}
+\measured{Inventory summarized from \texttt{data\_inventory.md}: 3.43M normalized events across 37 sources; messaging 2011--2026; wide multimodal capture from 2026-08; dense lanes from 2026-09-04; platform recommendation exports as single 2026 snapshots.}
+\todo{Table of sources, ranges, counts. Coverage figure.}
+
+\section{Formalization}
+Observed history $O_{1:t}$; representation $b_t \approx P(S_t \mid O_{1:t}, A_{1:t-1})$;
+clone $\pi_{\mathrm{clone}}(a \mid b_t)$; augmenting policy $\pi_{\mathrm{aug}}(a \mid b_t)$.
+Platform outputs $Y_t = f(z_t^{\mathrm{plat}}, C_t)$ are treated as observations from another estimator with unknown objective.
+Provisional score
+\begin{equation}
+s(x \mid b_t) = w_r\,\mathrm{rel}(x) + w_u\,\mathrm{unc}(x) + w_n\,\mathrm{nov}(x) + w_i\,\mathrm{IG}(x) + w_o\,\mathrm{OV}(x) - w_c\,\mathrm{cost}(x),
+\end{equation}
+with $\mathrm{IG}(a) = H(b_t) - \mathbb{E}[H(b_{t+1}) \mid a]$. \proposed{Each term is operationalized in EXPERIMENT\_PLAN.md E2 and ablated; none is assumed well-defined.}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{fig1_architecture.pdf}
+\caption{The belief / clone / explore loop. External platforms observe the subject and emit recommendations; those outputs enter the local belief as one more observation channel (an ``algorithmic mirror''). Both policies produce exposure candidates; the human chooses; the outcome becomes new experience.}
+\end{figure}
+
+\section{Experimental Design}
+\proposed{Exposure--action--outcome table (E1), leakage-safe features (E2), chronological splits with embargo $\ge$ horizon, policies and metrics (E3), mandatory negative controls.}
+\paragraph{Do we need RL?} No. Logged exposures, actions, and delayed outcomes under the subject's own policy support retrospective ranking with bandit-style exploration terms; the eventual problem is POMDP-shaped, the present data is not.
+
+\section{Falsification statement}
+\measured{Copied from RESEARCH\_QUESTIONS.md and frozen with the annotation protocol.} H-SER is false if the best exploration-aware policy does not improve recall@$k$ of consequential exposures over relevance-only by more than random exploration with an equal diversity budget, for every $k\in\{1,3,5,10\}$, on the held-out test periods.
+
+\section{Behavioral Clone Results}
+\measured{Recomputed from raw per-case scores (\texttt{scripts/verify\_carl\_model.py}).}
+\begin{table}[h]\centering
+\begin{tabular}{lrrr}\toprule
+Variant & Top-1 & $\Delta$ vs.\ A & 95\% CI (cluster bootstrap)\\\midrule
+A: immediate situation & 0.280 & --- & ---\\
+E: all context layers, base model & 0.256 & $-2.4$ & $[-4.6, +0.2]$\\
+E-shuf: shuffled context & 0.241 & $-4.0$ & $[-6.1, -1.4]$\\
+F: random history & 0.248 & $-3.2$ & $[-5.4, -1.2]$\\
+L: A + personal LoRA & \textbf{0.378} & $+9.8$ & $[+6.8, +13.4]$\\
+L+E: all layers + LoRA & 0.382 & $+10.1$ & $[+7.0, +14.1]$\\
+EM-own / EM-all (event model) & 0.289 / 0.293 & --- & EM-all vs.\ EM-own $+0.4$, n.s.\\\bottomrule
+\end{tabular}
+\caption{5-way next-action prediction, pooled over six action families ($n=1695$, \texttt{said} excluded per the original protocol), chance $=0.20$. The pre-registered primary hypothesis (E $>$ A) failed; the LoRA hypothesis (L $>$ A) held on 20 of 21 test days. Seventeen of the 21 days contain only \texttt{reply} and \texttt{sent} cases; per-family, L loses on \texttt{copied} ($n=30$), \texttt{clicked}, and \texttt{looked}.}
+\end{table}
+
+\section{Algorithmic Mirrors}
+\measured{Recommendation outputs exist only as single 2026 snapshots; no time series.}
+\proposed{Cross-sectional test E5.} \todo{}
+
+\section{Retrospective Serendipity Evaluation}
+\proposed{E3.} \todo{Figure 2 from real output replaces the synthetic placeholder.}
+
+\section{Ablations and Negative Controls}
+\proposed{E3 controls.} \todo{}
+
+\section{Limitations and Ethics}
+N=1; researcher--subject dual role; retrospective label bias; cherry-picking risk; privacy; non-independence; recommendation-system confounding; no causal inference from observational trajectories. \todo{Expand from ETHICS\_AND\_PRIVACY.md.}
+
+\section{Discussion}
+\todo{}
+
+\section{Conclusion}
+\todo{}
+
+\bibliographystyle{plainnat}
+\bibliography{refs}
+\end{document}

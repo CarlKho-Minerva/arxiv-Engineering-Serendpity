@@ -1,0 +1,60 @@
+# ---- PRIVACY: nothing personal leaves this machine ----
+# Raw exports, derived event streams, embeddings, caches, checkpoints.
+data/
+!data/README.md
+results/private/
+*.parquet
+*.feather
+*.sqlite
+*.sqlite3
+*.db
+*.jsonl
+*.mbox
+*.ics
+*.vcf
+*.npy
+*.npz
+*.safetensors
+*.pt
+*.bin
+*.gguf
+adapters/
+checkpoints/
+embeddings/
+cache/
+.cache/
+# annotation CSVs with real events stay local; only the template is tracked
+annotations/*.csv
+!annotations/trajectory_events.template.csv
+annotations/private/
+# demo real-data fixtures (only sample_data.json, which is synthetic, is tracked)
+demo/real_*.json
+demo/*.parquet
+# secrets
+.env
+.env.*
+*.pem
+*.key
+# python / tooling
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.ipynb_checkpoints/
+*.egg-info/
+build/
+dist/
+# latex
+paper/*.aux
+paper/*.log
+paper/*.out
+paper/*.bbl
+paper/*.blg
+paper/*.fls
+paper/*.fdb_latexmk
+paper/*.synctex.gz
+paper/*.toc
+# os
+.DS_Store

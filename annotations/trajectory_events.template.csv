@@ -1,0 +1,2 @@
+event_id,exposure_time,exposure_type,source,info_available_at_exposure,later_outcome,outcome_horizon_days,confidence,annotation_rationale,manually_labeled,evidence_direct_or_inferred,annotated_on,blind_to_rankings
+EXAMPLE-0000,2019-03-14T10:00:00Z,inbound_message,msg_messenger,"[REDACTED] first message from a hashed counterpart with 0 prior contact; topic=hackathon","tie_persisted; repeat_interactions=12; new_context=email; project",365,0.8,"Counterpart later co-organized a project (evidence: 14 threads across 2 sources within horizon)",true,direct,2026-09-26,true
