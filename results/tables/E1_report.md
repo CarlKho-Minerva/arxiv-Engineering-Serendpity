@@ -64,3 +64,38 @@ Encoder: `paraphrase-multilingual-MiniLM-L12-v2` on the Mac (MPS), 35,168 exposu
 | content, reply model on all exposures (AUC 0.643) | 0.643 | 0.353 [0.25, 0.46] | 0.381 [0.27, 0.49] | 0.344 [0.25, 0.44] | 0.504 [0.40, 0.61] | 0.312 |
 
 Reading: content raises the reply model's AUC (0.54 → 0.59 → 0.64 when trained on all 15k train-period exposures), but no policy beats random-with-diversity, and **embedding novelty is worse than the metadata new-thread flag** (novelty r@3 0.464 → 0.381): "unlike what he recently wrote" is not the kind of novelty that predicts a lasting tie. The hybrid's train-tuned weights move toward uncertainty and information gain once the reply model has signal, without changing the outcome. Next: typed judgments (AnyJev L0 on the PC's Gemma 4 31B) as features; see `src/features/judgments_anyjev.py`.
+
+## Addendum 2026-09-26 (later): AnyJev typed judgments (validation split)
+
+Six typed questions per weak-tie exposure (invites action, expects reply, org/group, automated, option-value score, message-type choice), answered by AnyJev L0 (nokia-applied-research/AnyJev, zero labels, option-order bias averaged out) on the PC's vLLM Gemma 4 31B AWQ; 3,719 exposures, 0.6 s each. `src/features/judgments_anyjev.py`. Nothing left the subject's machines.
+
+**What the judgments say about the Tier A label** (mean over weak-tie exposures with complete labels):
+
+| judgment | ordinary | later-consequential (Tier A) | AUC for Tier A |
+|---|---|---|---|
+| P(invites action) | 0.261 | 0.120 | 0.47 |
+| P(org or group) | 0.361 | 0.147 | 0.41 |
+| P(automated / marketing) | 0.372 | 0.202 | 0.37 |
+| E[option value] (0–3) | 1.135 | 1.051 | 0.49 |
+| P(type = personal/social chat) | 0.365 | 0.565 | 0.63 |
+| P(type = invitation/opportunity) | 0.070 | 0.030 | 0.57 |
+
+Reading: among weak-tie inbound messages, the ones that became sustained ties were **less** often invitations, opportunities, or organizational messages and **more** often personal chat from a new person. The message-level "opportunity-ness" that the exploration score was built to reward is anti-correlated with the Tier A outcome. Also, ~37% of ordinary weak-tie exposures are judged automated or marketing, i.e. not exposures from a person; that is a candidate-set defect, fixed below by a filter.
+
+**Policies (validation, Tier A labels, hybrid tuned on train weeks):**
+
+| variant | relevance r@3 | novelty r@3 | hybrid r@3 | random-diversity r@3 | novelty MRR | random-diversity MRR |
+|---|---|---|---|---|---|---|
+| metadata only (baseline) | 0.372 [0.27, 0.48] | 0.464 [0.36, 0.57] | 0.409 [0.29, 0.52] | 0.504 [0.40, 0.61] | 0.365 | 0.389 |
+| judgments, reply model on candidates (AUC 0.650) | 0.301 [0.20, 0.41] | 0.464 [0.36, 0.57] | 0.412 [0.31, 0.52] | 0.504 [0.40, 0.61] | 0.365 | 0.389 |
+| judgments + content, reply model on all (AUC 0.646) | 0.393 [0.29, 0.50] | 0.464 [0.36, 0.57] | 0.388 [0.29, 0.49] | 0.504 [0.40, 0.61] | 0.365 | 0.389 |
+| same, candidates with p_automated ≤ 0.5 (AUC 0.606; 56 weeks; median set 5) | 0.452 [0.34, 0.57] | 0.586 [0.48, 0.70] | 0.469 [0.36, 0.58] | 0.546 [0.43, 0.66] | 0.449 | 0.413 |
+
+Reading:
+
+1. Judgment features lift the reply model to AUC 0.65 (from 0.54 metadata-only), the best so far, but the reply model is not what ranks consequential exposures: relevance-only stays at or below random.
+2. **Removing automated messages from the candidate pool is the first change that lets a non-random exploration policy beat random-with-diversity**: novelty-only r@3 0.586 vs 0.546, MRR 0.449 vs 0.413, r@5 0.785 vs 0.738. Intervals overlap; this is validation, not test, and the filter threshold was chosen after seeing the judgment distribution on the full candidate pool (including val), so it must be pre-registered before the test run rather than claimed from this table.
+3. The hybrid never beats novelty-only. The train-tuned weights now put 1.0 on the AnyJev option-value score and 0 on novelty, and that choice is wrong on val. Uncertainty and information-gain terms never help. As operationalized, H-SER's *hybrid* form is unsupported; the surviving signal is "a new person wrote to him" (metadata novelty).
+4. Candidate sets shrink to a median of 5 after the filter, so budgets k ≥ 5 saturate; r@1 and r@3 are the informative numbers.
+
+Implication for the protocol freeze: (a) candidate pool = weak-tie exposures with p_automated ≤ 0.5 (pre-registered, a priori defensible: an exposure is a message from a person); (b) primary comparison = novelty-only and hybrid vs random-with-diversity at k ∈ {1, 3}; (c) Tier B labels (`annotations/private/tier_b_labels_v1.csv`, page at demo/label_tier_b.py) decide whether "consequential" as Carl judges it behaves like Tier A, and feed an AnyJev L2 head for the judgment itself.

@@ -82,6 +82,8 @@ def main():
                     help="fit the reply model on train-period candidates only, or on every train-period exposure")
     ap.add_argument("--pca", type=int, default=32)
     ap.add_argument("--judgments", action="store_true", help="add AnyJev typed-judgment features (data/derived/judgments.parquet)")
+    ap.add_argument("--exclude-automated", type=float, default=None, metavar="P",
+                    help="drop candidates whose AnyJev p_automated > P (needs --judgments); candidate-set definition, not a policy")
     ap.add_argument("--novelty", choices=["meta", "content"], default="meta",
                     help="which novelty feeds the policies (metadata new-thread flag, or 1 - max cosine to own recent text)")
     a = ap.parse_args()
@@ -90,6 +92,10 @@ def main():
     df["t"] = pd.to_datetime(df["t"], utc=True)
     stream_end = df["t"].max()
     df["is_candidate"] = (df["is_new_thread"] | df["is_dormant"]) if a.candidates == "weak" else True
+    if a.exclude_automated is not None:
+        jj = pd.read_parquet(ROOT / "data" / "derived" / "judgments.parquet", columns=["exposure_id", "p_automated"]).set_index("exposure_id")
+        pa = jj["p_automated"].reindex(df["exposure_id"].to_numpy()).to_numpy()
+        df["is_candidate"] = df["is_candidate"] & ~(pa > a.exclude_automated)
     df = df[df[f"label_complete_{H}"]].copy()
     if a.train_on == "candidates":
         df = df[df["is_candidate"]].copy()
@@ -173,17 +179,17 @@ def main():
     if content_novelty is not None:
         out["content_novelty"] = content_novelty; out["content_sim_mean"] = content_sim_mean
     out["novelty"] = content_novelty if (a.novelty == "content" and content_novelty is not None) else out["novelty_meta"]
+    out["popularity"] = df["source_prior_share"].fillna(0)
+    out["option_value"] = 0.5 * df["is_new_thread"].astype(float) + 0.5 * np.minimum(1.0, np.log1p(df["npart"]) / np.log1p(50))
+    p99 = np.log1p(df.loc[tr, "chars_first_msg"]).quantile(0.99)
+    out["cost"] = np.clip(np.log1p(df["chars_first_msg"]) / max(p99, 1e-9), 0, 1)
+    out["n_seen"] = df["prior_contact_events"] + 1
     if J is not None:
         for c in J.columns:
             out["j_" + c] = J[c].to_numpy()
         out["option_value_proxy"] = out["option_value"]
         out["option_value"] = np.clip(J["ev_option_value"].to_numpy() / 3.0, 0, 1)
         out["opportunity"] = J["p_invites_action"].to_numpy()
-    out["popularity"] = df["source_prior_share"].fillna(0)
-    out["option_value"] = 0.5 * df["is_new_thread"].astype(float) + 0.5 * np.minimum(1.0, np.log1p(df["npart"]) / np.log1p(50))
-    p99 = np.log1p(df.loc[tr, "chars_first_msg"]).quantile(0.99)
-    out["cost"] = np.clip(np.log1p(df["chars_first_msg"]) / max(p99, 1e-9), 0, 1)
-    out["n_seen"] = df["prior_contact_events"] + 1
     out["replied_7d"] = df["replied_7d"].astype(int)
     out["consequential"] = df[f"consequential_auto_{H}"].astype(int)
     out["gain"] = np.log1p(df[f"bursts_{H}"])
@@ -195,7 +201,7 @@ def main():
     # relevance-model sanity on val (AUC) — the clone-of-engagement half of the table
     from sklearn.metrics import roc_auc_score
     va = ((df["split"] == "val") & df["is_candidate"]).to_numpy()
-    info = {"generated": dt.datetime.now(UTC).isoformat(timespec="seconds"), "horizon_days": H, "candidates": a.candidates, "content": a.content, "train_on": a.train_on, "judgments": a.judgments, "novelty": a.novelty,
+    info = {"generated": dt.datetime.now(UTC).isoformat(timespec="seconds"), "horizon_days": H, "candidates": a.candidates, "content": a.content, "train_on": a.train_on, "judgments": a.judgments, "novelty": a.novelty, "exclude_automated": a.exclude_automated,
             "split": {k: (v.isoformat() if isinstance(v, dt.datetime) else v) for k, v in dataclasses.asdict(split).items()},
             "stream_end": str(stream_end), "n": {s: int((df["split"] == s).sum()) for s in ("train", "val", "test")},
             "positives": {s: int(df.loc[df["split"] == s, f"consequential_auto_{H}"].sum()) for s in ("train", "val", "test")},

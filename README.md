@@ -17,7 +17,7 @@ demo and Figure 2 still on a synthetic fixture. No test-split result exists.
 | | status |
 |---|---|
 | Behavioral clone (RQ1): personal LoRA lifts 5-way next-action top-1 from 28.0% to 37.8% (+9.8, CI [6.8, 13.4], 20/21 days) | **measured**, reproduced by `scripts/verify_carl_model.py` → `results/carl_model_verified.json` |
-| Retrospective serendipity ranking (RQ3–RQ5) | **E1 table built** (35,168 contact events 2011–2026; 3,719 weak-tie); **validation-only run**: relevance-only worst, hybrid does not beat random-with-diversity, reply-model AUC 0.54. See `results/tables/E1_report.md`. Test split untouched until the annotation freeze. |
+| Retrospective serendipity ranking (RQ3–RQ5) | **E1 table built** (35,168 contact events 2011–2026; 3,719 weak-tie). **Validation-only runs** with metadata, local content embeddings, and AnyJev typed judgments (Gemma 4 31B on the subject's PC): relevance-only at or below random; hybrid never beats random-with-diversity; novelty-only beats it once automated messages are filtered from the pool (overlapping CIs). Consequential weak-tie exposures are *less* opportunity-like by the judgments. See `results/tables/E1_report.md`. Test split untouched until the annotation freeze. |
 | Algorithmic-mirror time series (RQ2, RQ7) | **not testable**: recommendation exports are single 2026 snapshots |
 | Exploration rate across life periods (RQ6) | **exploratory pass done**: fig3 + yearly tables (messages) + Facebook friends/groups per month |
 
@@ -42,6 +42,9 @@ scripts/run_retrospective.py   the centrepiece experiment (synthetic until real 
 scripts/run_baselines.py       RQ3 premise check
 scripts/build_figures.py       SVG + PDF + PNG into paper/figures/
 demo/app.py                Streamlit demo; demo/sample_data.json is SYNTHETIC
+demo/label_tier_b.py       Tier B labelling page (local, resumable, blind to rankings)
+src/features/judgments_anyjev.py  AnyJev L0 typed judgments via the PC's vLLM (Gemma 4 31B)
+src/features/embed_messages.py    local MiniLM embeddings (MPS)
 paper/main.tex, refs.bib   skeleton; every claim tagged measured / proposed / hypothesis
 results/                   aggregates only (metrics.json is synthetic until stated otherwise)
 tests/                     leakage injection, split monotonicity, policy scoring
