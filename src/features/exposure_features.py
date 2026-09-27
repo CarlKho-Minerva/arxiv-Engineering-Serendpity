@@ -82,6 +82,7 @@ def main():
                     help="fit the reply model on train-period candidates only, or on every train-period exposure")
     ap.add_argument("--pca", type=int, default=32)
     ap.add_argument("--judgments", action="store_true", help="add AnyJev typed-judgment features (data/derived/judgments.parquet)")
+    ap.add_argument("--judgments-file", default="judgments.parquet", help="file under data/derived/ to read judgments from (e.g. judgments_qwen8b.parquet)")
     ap.add_argument("--exclude-automated", type=float, default=None, metavar="P",
                     help="drop candidates whose AnyJev p_automated > P (needs --judgments); candidate-set definition, not a policy")
     ap.add_argument("--novelty", choices=["meta", "content"], default="meta",
@@ -93,7 +94,7 @@ def main():
     stream_end = df["t"].max()
     df["is_candidate"] = (df["is_new_thread"] | df["is_dormant"]) if a.candidates == "weak" else True
     if a.exclude_automated is not None:
-        jj = pd.read_parquet(ROOT / "data" / "derived" / "judgments.parquet", columns=["exposure_id", "p_automated"]).set_index("exposure_id")
+        jj = pd.read_parquet(ROOT / "data" / "derived" / a.judgments_file, columns=["exposure_id", "p_automated"]).set_index("exposure_id")
         pa = jj["p_automated"].reindex(df["exposure_id"].to_numpy()).to_numpy()
         df["is_candidate"] = df["is_candidate"] & ~(pa > a.exclude_automated)
     df = df[df[f"label_complete_{H}"]].copy()
@@ -146,7 +147,7 @@ def main():
             X[f"pc{j}"] = Z[:, j]
     J = None
     if a.judgments:
-        J = pd.read_parquet(ROOT / "data" / "derived" / "judgments.parquet").set_index("exposure_id")
+        J = pd.read_parquet(ROOT / "data" / "derived" / a.judgments_file).set_index("exposure_id")
         jcols = [c for c in J.columns if c.startswith(("p_", "ev_"))]
         J = J[jcols].reindex(df["exposure_id"].to_numpy())
         if J.isna().any(axis=None):
@@ -201,7 +202,7 @@ def main():
     # relevance-model sanity on val (AUC) — the clone-of-engagement half of the table
     from sklearn.metrics import roc_auc_score
     va = ((df["split"] == "val") & df["is_candidate"]).to_numpy()
-    info = {"generated": dt.datetime.now(UTC).isoformat(timespec="seconds"), "horizon_days": H, "candidates": a.candidates, "content": a.content, "train_on": a.train_on, "judgments": a.judgments, "novelty": a.novelty, "exclude_automated": a.exclude_automated,
+    info = {"generated": dt.datetime.now(UTC).isoformat(timespec="seconds"), "horizon_days": H, "candidates": a.candidates, "content": a.content, "train_on": a.train_on, "judgments": a.judgments, "judgments_file": a.judgments_file, "novelty": a.novelty, "exclude_automated": a.exclude_automated,
             "split": {k: (v.isoformat() if isinstance(v, dt.datetime) else v) for k, v in dataclasses.asdict(split).items()},
             "stream_end": str(stream_end), "n": {s: int((df["split"] == s).sum()) for s in ("train", "val", "test")},
             "positives": {s: int(df.loc[df["split"] == s, f"consequential_auto_{H}"].sum()) for s in ("train", "val", "test")},

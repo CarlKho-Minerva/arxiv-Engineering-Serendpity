@@ -101,7 +101,20 @@ EM-own / EM-all (event model) & 0.289 / 0.293 & --- & EM-all vs.\ EM-own $+0.4$,
 \proposed{Cross-sectional test E5.} \todo{}
 
 \section{Retrospective Serendipity Evaluation}
-\proposed{E3.} \todo{Figure 2 from real output replaces the synthetic placeholder.}
+\measured{Validation split only (2021--2022); test split untouched pending the annotation freeze. Weak-tie inbound exposures, Tier A labels (tie persisted $\wedge \geq 5$ later bursts within 365 d), weekly candidate sets, cluster bootstrap over weeks, stochastic policies averaged over 20 seeds.}
+\begin{table}[h]\centering
+\begin{tabular}{lrrr}\toprule
+Policy & recall@1 & recall@3 & MRR\\\midrule
+Relevance-only (clone proxy) & 0.115 & 0.298 [0.20, 0.40] & 0.296\\
+Hybrid (unc.\ + IG + option value) & 0.106 & 0.368 [0.27, 0.47] & 0.310\\
+Random & 0.135 & 0.413 [0.35, 0.48] & 0.343\\
+Random with diversity budget & 0.117 & 0.455 [0.39, 0.53] & 0.346\\
+Novelty-only (new person first) & 0.148 & 0.471 [0.40, 0.55] & 0.368\\
+\bottomrule\end{tabular}
+\caption{Validation-split ranking of later-consequential weak-tie exposures (63 weeks with a positive, median 8 candidates per week). Relevance-only ranks them below random; the hybrid exploration score does not beat random exploration with an equal diversity budget; plain novelty has a small edge with overlapping intervals. Reply-model AUC 0.678 with AnyJev judgment features.}
+\end{table}
+\measured{Judgments from two local models agree that the exposures which became lasting ties were personal first messages from new people rather than invitations or organizational outreach (inter-judge $\kappa$ 0.62--0.68 on those questions).}
+\todo{Test-split run after the annotation freeze; Tier B labels; Figure 2 from real output.}
 
 \section{Ablations and Negative Controls}
 \proposed{E3 controls.} \todo{}

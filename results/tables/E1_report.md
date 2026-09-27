@@ -99,3 +99,47 @@ Reading:
 4. Candidate sets shrink to a median of 5 after the filter, so budgets k ≥ 5 saturate; r@1 and r@3 are the informative numbers.
 
 Implication for the protocol freeze: (a) candidate pool = weak-tie exposures with p_automated ≤ 0.5 (pre-registered, a priori defensible: an exposure is a message from a person); (b) primary comparison = novelty-only and hybrid vs random-with-diversity at k ∈ {1, 3}; (c) Tier B labels (`annotations/private/tier_b_labels_v1.csv`, page at demo/label_tier_b.py) decide whether "consequential" as Carl judges it behaves like Tier A, and feed an AnyJev L2 head for the judgment itself.
+
+## Addendum 2026-09-26 (late): judgments on all 35,168 exposures; stochastic baselines averaged over 20 seeds
+
+AnyJev L0 (Gemma 4 31B AWQ, PC vLLM) now covers every exposure, so the reply model trains on all 15k train-period rows with judgment features and no imputation: **validation AUC 0.678**, the best so far (metadata 0.544, +content 0.643, +judgments 0.678).
+
+Runner fix: policies with heavy ties (novelty, popularity) and the random/ε-greedy/Thompson baselines are now averaged over 20 seeds per week before the cluster bootstrap. Earlier tables in this file used a single seed and moved by up to 0.05 between identical runs; treat them as superseded by the two tables below.
+
+**A. Full weak-tie pool** (63 weeks with a positive; candidate set mean 8.6, median 8; hybrid weights tuned on train: {'relevance': 1.0, 'uncertainty': 0.25, 'novelty': 0.0, 'info_gain': 0.25, 'option_value': 0.5, 'cost': 0.25})
+
+| policy | recall@1 | recall@3 | recall@5 | MRR |
+|---|---|---|---|---|
+| relevance | 0.115 [0.06, 0.19] | 0.298 [0.20, 0.40] | 0.510 [0.40, 0.61] | 0.296 |
+| ucb | 0.115 [0.05, 0.19] | 0.284 [0.19, 0.38] | 0.504 [0.39, 0.61] | 0.288 |
+| thompson | 0.112 [0.06, 0.17] | 0.312 [0.22, 0.41] | 0.504 [0.40, 0.60] | 0.298 |
+| epsilon_greedy | 0.136 [0.10, 0.17] | 0.366 [0.29, 0.45] | 0.546 [0.46, 0.63] | 0.329 |
+| hybrid | 0.106 [0.04, 0.18] | 0.368 [0.27, 0.47] | 0.541 [0.44, 0.65] | 0.310 |
+| popularity | 0.151 [0.07, 0.23] | 0.418 [0.31, 0.53] | 0.636 [0.52, 0.75] | 0.356 |
+| novelty | 0.148 [0.12, 0.18] | 0.471 [0.40, 0.55] | 0.665 [0.59, 0.75] | 0.368 |
+| random | 0.135 [0.10, 0.17] | 0.413 [0.35, 0.48] | 0.618 [0.55, 0.69] | 0.343 |
+| random_diversity | 0.117 [0.10, 0.14] | 0.455 [0.39, 0.53] | 0.689 [0.61, 0.77] | 0.346 |
+
+**B. Automated messages removed (Gemma p_automated ≤ 0.5)** (56 weeks; candidate set mean 6.4, median 5; hybrid weights: {'relevance': 1.0, 'uncertainty': 0.25, 'novelty': 0.0, 'info_gain': 0.0, 'option_value': 1.0, 'cost': 0.25})
+
+| policy | recall@1 | recall@3 | recall@5 | MRR |
+|---|---|---|---|---|
+| relevance | 0.152 [0.07, 0.24] | 0.375 [0.26, 0.49] | 0.574 [0.46, 0.68] | 0.347 |
+| ucb | 0.134 [0.06, 0.22] | 0.374 [0.26, 0.49] | 0.562 [0.45, 0.68] | 0.333 |
+| thompson | 0.152 [0.09, 0.23] | 0.398 [0.30, 0.50] | 0.575 [0.47, 0.68] | 0.352 |
+| epsilon_greedy | 0.189 [0.15, 0.24] | 0.459 [0.37, 0.55] | 0.601 [0.51, 0.69] | 0.389 |
+| hybrid | 0.167 [0.08, 0.27] | 0.444 [0.33, 0.56] | 0.646 [0.55, 0.74] | 0.374 |
+| popularity | 0.209 [0.11, 0.31] | 0.489 [0.36, 0.61] | 0.701 [0.59, 0.81] | 0.413 |
+| novelty | 0.219 [0.17, 0.28] | 0.576 [0.49, 0.67] | 0.746 [0.66, 0.82] | 0.440 |
+| random | 0.187 [0.15, 0.24] | 0.526 [0.45, 0.60] | 0.716 [0.64, 0.79] | 0.408 |
+| random_diversity | 0.190 [0.15, 0.24] | 0.543 [0.46, 0.62] | 0.733 [0.66, 0.81] | 0.418 |
+
+**Reading (validation split, Tier A labels, pre-registration pending):**
+
+1. **RQ3 holds.** Relevance-only (= the behavioral-clone proxy here) is the worst or near-worst policy in both pools, below plain random: a ranker trained to predict engagement buries the weak-tie exposures that became lasting ties.
+2. **H-SER's hybrid form is not supported.** With uncertainty, information-gain and option-value terms, the hybrid never beats random-with-diversity (A: MRR 0.310 vs 0.346; B: 0.374 vs 0.418). The pre-stated falsifier is met on validation.
+3. **Plain novelty is the only exploration signal with an edge**, and it is small: MRR 0.368 vs 0.346 (A) and 0.440 vs 0.418 (B), recall@3 0.471 vs 0.455 and 0.576 vs 0.543, all with overlapping 95% intervals. Its tie-breaking is random within new threads, so "novelty" here means "new person first, then coin flip".
+4. Removing automated messages helps every policy about equally; the ordering does not change. Gemma flags 36% of ordinary weak-tie messages as automated, Qwen3-8B 11% (κ 0.38 between judges), so the filter's threshold is judge-dependent and must be pre-registered with the judge named.
+5. Second judge (Qwen3-8B, MLX, both Macs): the substantive finding replicates. On the same 1,610 labelled exposures, consequential weak ties are less often invitations (Qwen 0.05 vs 0.17; Gemma 0.11 vs 0.26), less often organizational (0.05 vs 0.23; 0.15 vs 0.36), and more often personal chat (0.56 vs 0.43; 0.59 vs 0.36). Inter-judge κ: invitation 0.68, organization 0.68, marketing 0.68, social 0.62, expects-reply 0.38, automated 0.38.
+
+Implication: as a paper result, the honest statement is "on one subject's fifteen years of inbound messages, the exposures that became lasting ties were casual first messages from new people; a relevance ranker suppresses them, a novelty ranker recovers them slightly better than chance, and hand-built uncertainty/information-gain/option-value bonuses add nothing." The test split remains untouched pending Tier B labels and the protocol freeze (candidate pool: weak-tie ∧ Gemma p_automated ≤ 0.5; primary comparison: novelty and hybrid vs random-with-diversity at k ∈ {1, 3}; 20-seed averaging).

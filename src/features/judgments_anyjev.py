@@ -76,7 +76,8 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--all", action="store_true")
     ap.add_argument("--limit", type=int, default=0)
-    ap.add_argument("--workers", type=int, default=16)
+    ap.add_argument("--workers", type=int, default=16, help="HTTP workers per server")
+    ap.add_argument("--urls", default=URL, help="comma-separated vLLM base URLs serving the same model; chunks are pulled from a shared queue")
     ap.add_argument("--chunk", type=int, default=200)
     ap.add_argument("--out", default=str(DER / "judgments.parquet"))
     a = ap.parse_args()
@@ -95,11 +96,15 @@ def main():
     texts = load_texts(exp)
     todo = [r for r in exp.itertuples() if r.exposure_id in texts]
     print(f"to score: {len(todo)} exposures × {len(QUESTIONS)} questions (AnyJev L0, {SERVED})", file=sys.stderr)
-    be = VLLMBackend(URL, SERVED, tokenizer_name=TOKENIZER, workers=a.workers)
-    d = Decider(be, level="L0")
-    t0 = time.time()
-    for c0 in range(0, len(todo), a.chunk):
-        chunk = todo[c0:c0 + a.chunk]
+    import queue, threading
+    urls = [u.strip() for u in a.urls.split(",") if u.strip()]
+    chunks = [todo[i:i + a.chunk] for i in range(0, len(todo), a.chunk)]
+    qch: "queue.Queue[list]" = queue.Queue()
+    for c in chunks:
+        qch.put(c)
+    lock = threading.Lock(); t0 = time.time(); done_n = [0]; per_url = {u: 0 for u in urls}
+
+    def score_chunk(d: Decider, chunk: list) -> list[dict]:
         states = [{"situation": situation(r), "message": texts[r.exposure_id]} for r in chunk]
         cols = {r.exposure_id: {"exposure_id": r.exposure_id, "model": SERVED} for r in chunk}
         for q in QUESTIONS:
@@ -116,10 +121,35 @@ def main():
                 else:
                     for k, v in zip(TYPE_KEYS, p):
                         o[f"p_{q.name}_{k}"] = float(v)
-        rows.extend(cols.values())
-        pd.DataFrame(rows).to_parquet(outp, index=False)
-        n = c0 + len(chunk); el = time.time() - t0
-        print(f"{n}/{len(todo)} in {el:.0f}s ({el/n:.2f}s each), eta {(len(todo)-n)*el/n/60:.0f} min", file=sys.stderr)
+        return list(cols.values())
+
+    def worker(url: str):
+        d = Decider(VLLMBackend(url, SERVED, tokenizer_name=TOKENIZER, workers=a.workers), level="L0")
+        while True:
+            try:
+                chunk = qch.get_nowait()
+            except queue.Empty:
+                return
+            for attempt in range(3):
+                try:
+                    res = score_chunk(d, chunk); break
+                except Exception as e:  # noqa: BLE001
+                    print(f"{url}: chunk failed (attempt {attempt+1}): {str(e)[:160]}", file=sys.stderr); time.sleep(10)
+            else:
+                qch.put(chunk); print(f"{url}: giving up on a chunk, requeued", file=sys.stderr); time.sleep(30); continue
+            with lock:
+                rows.extend(res); done_n[0] += len(chunk); per_url[url] += len(chunk)
+                pd.DataFrame(rows).to_parquet(outp, index=False)
+                n = done_n[0]; el = time.time() - t0
+                print(f"{n}/{len(todo)} in {el:.0f}s ({el/n:.2f}s each), eta {(len(todo)-n)*el/n/60:.0f} min | "
+                      + ", ".join(f"{u.split('//')[1]}: {k}" for u, k in per_url.items()), file=sys.stderr)
+
+    threads = [threading.Thread(target=worker, args=(u,), daemon=True) for u in urls]
+    for t in threads:
+        t.start()
+    for t in threads:
+        t.join()
+    pd.DataFrame(rows).to_parquet(outp, index=False)
     print(f"wrote {outp}: {len(rows)} rows", file=sys.stderr)
 
 

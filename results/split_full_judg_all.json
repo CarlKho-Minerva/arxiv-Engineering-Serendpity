@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-27T06:23:10+00:00",
+ "generated": "2026-09-27T06:22:54+00:00",
  "horizon_days": 365,
  "candidates": "weak",
  "content": true,
@@ -7,7 +7,7 @@
  "judgments": true,
  "judgments_file": "judgments.parquet",
  "novelty": "meta",
- "exclude_automated": 0.5,
+ "exclude_automated": null,
  "split": {
   "train_end": "2019-12-31T23:59:59+00:00",
   "val_start": "2021-01-01T00:00:00+00:00",
@@ -27,11 +27,11 @@
   "test": 3693
  },
  "weeks_with_positives": {
-  "train": 83,
-  "val": 56,
-  "test": 30
+  "train": 100,
+  "val": 63,
+  "test": 39
  },
- "relevance_auc_val": 0.6655311271422574,
+ "relevance_auc_val": 0.678113675850087,
  "relevance_auc_test_NOT_TO_BE_READ_BEFORE_FREEZE": null,
  "features": [
   "new",

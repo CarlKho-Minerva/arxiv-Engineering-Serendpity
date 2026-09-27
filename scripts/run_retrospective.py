@@ -119,6 +119,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--real", type=Path, default=None)
     ap.add_argument("--seed", type=int, default=0)
+    ap.add_argument("--seeds", type=int, default=20, help="stochastic policies are averaged over this many seeds per day")
     ap.add_argument("--split-eval", choices=["val", "test"], default="test",
                     help="evaluate on val while the annotation protocol is unfrozen; test only after the freeze")
     a = ap.parse_args()
@@ -144,14 +145,25 @@ def main():
         tuned = Weights(relevance=1.0, uncertainty=0.5, novelty=0.5, info_gain=0.5, option_value=0.5, cost=0.25).as_dict()
         policies["hybrid"] = hybrid_policy(Weights(**tuned))
     test = df[df["split"] == a.split_eval]
+    STOCHASTIC = {"random", "random_diversity", "epsilon_greedy", "thompson", "novelty", "popularity"}  # last two: heavy ties, broken at random
     rows = []
     for day, d in test.groupby("day"):
         if d[LABEL].sum() == 0:
             continue
         pols = dict(policies)
         pols["random_diversity"] = lambda frame, r, k=5: random_with_diversity(frame, r, k)
-        for row in evaluate_day(d.reset_index(drop=True), pols, rng):
+        dd = d.reset_index(drop=True)
+        det = {n: f for n, f in pols.items() if n not in STOCHASTIC}
+        sto = {n: f for n, f in pols.items() if n in STOCHASTIC}
+        for row in evaluate_day(dd, det, rng):
             row["day"] = day; rows.append(row)
+        acc = []
+        for sd in range(a.seeds):
+            acc.extend(evaluate_day(dd, sto, np.random.default_rng(a.seed * 1000 + sd)))
+        accdf = pd.DataFrame(acc)
+        for name, grp in accdf.groupby("policy"):
+            row = grp.drop(columns="policy").mean(numeric_only=True).to_dict()
+            row["policy"] = name; row["day"] = day; rows.append(row)
     per_day = pd.DataFrame(rows)
     set_sizes = test.groupby("day").size()
     metrics = {m: bootstrap(per_day, m, rng) for m in ["mrr"] + [f"{s}@{k}" for s in ("recall", "ndcg", "coverage", "novelty") for k in KS]}
@@ -163,7 +175,7 @@ def main():
            "n_test_days_with_positives": int(per_day["day"].nunique()),
            "candidate_set_size": {"mean": float(set_sizes.mean()), "median": float(set_sizes.median()),
                                   "p90": float(set_sizes.quantile(.9)), "max": int(set_sizes.max())},
-           "hybrid_weights": tuned, "hybrid_tuned_on": tune_split if not synthetic else None, "ks": list(KS), "metrics": metrics}
+           "hybrid_weights": tuned, "hybrid_tuned_on": tune_split if not synthetic else None, "stochastic_seeds": a.seeds, "ks": list(KS), "metrics": metrics}
     (ROOT / "results").mkdir(exist_ok=True)
     (ROOT / "results" / ("metrics.json" if synthetic else f"metrics_{a.split_eval}.json")).write_text(json.dumps(out, indent=1))
     # markdown table
