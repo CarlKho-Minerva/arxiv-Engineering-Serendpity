@@ -1,8 +1,10 @@
 # History rewrite (2026-09-27)
 
-On 2026-09-27, after the test split was opened and before the manuscript was submitted, this repository's git history was rewritten with git-filter-repo to remove the author's personal account names, an Instagram handle and a private network address from two files (, ). Nothing else changed: file contents are otherwise identical, and every commit keeps its original author and committer timestamps. Commit IDs changed as a consequence.
+On 2026-09-27, after the test split was opened and before the manuscript was submitted, this repository's git history was rewritten with git-filter-repo to remove the author's personal account names, an Instagram handle and a private network address from two files (`data_inventory.md`, `src/features/judgments_anyjev.py`). Nothing else changed: file contents are otherwise identical, and every commit keeps its original author and committer timestamps. Commit IDs changed as a consequence.
 
-The pre-registration freeze commit was pushed to GitHub as  at 2026-09-27T19:16:34Z (GitHub push event); the test split was opened at 2026-09-27T19:16:42Z. After the rewrite, the same commit is  and is still the target of tag  (tagger date unchanged). The author keeps a private bundle of the original history for verification.
+The pre-registration freeze commit was pushed to GitHub as `88626426fa595fe3383d383b9046da51d3c74700` at 2026-09-27T19:16:34Z (GitHub push event); the test split was opened at 2026-09-27T19:16:42Z. After the rewrite, the same commit is `20c6ceb7a705054a8c93d0f554c7cab86ffa3142` and is still the target of tag `annotation-v1` (tagger date unchanged). The author keeps a private bundle of the original history for verification.
+
+Commits made after the rewrite (starting with the one that added this file) have no original counterpart.
 
 | original commit | rewritten commit |
 |---|---|
