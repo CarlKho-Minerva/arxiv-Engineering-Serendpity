@@ -10,15 +10,15 @@ N = json.loads((ROOT / "results" / "paper_numbers.json").read_text())
 T = ROOT / "paper" / "tables"; T.mkdir(parents=True, exist_ok=True)
 
 
-def fmt(x, nd=3):
+def fmt(x, nd=3, keep_sign=False):
     t = f"{x:.{nd}f}"
-    if t.startswith("-") and float(t) == 0:
+    if t.startswith("-") and float(t) == 0 and not keep_sign:
         t = t[1:]
     return t.replace("-", "$-$")
 
 
-def ci(c, nd=3):
-    return f"[{fmt(c[0], nd)}, {fmt(c[1], nd)}]"
+def ci(c, nd=3, keep_sign=False):
+    return f"[{fmt(c[0], nd, keep_sign)}, {fmt(c[1], nd, keep_sign)}]"
 
 
 # ---- Table: sources (counts from paper_numbers.json)
@@ -31,10 +31,10 @@ rows = [f"{nm} & {SRC['first_year'][k]} & {SRC['messages'][k]:,} & {ex['by_sourc
 
 # ---- Table: clone
 c = N["clone"]; v = c["variants"]; vs = c["vs_A"]
-lab = {"A": "A: immediate situation", "E": "E: all context layers, base model", "E-shuf": "E-shuf: shuffled context",
+lab = {"A": "A: immediate situation", "C": "C: relevant personal history", "E": "E: all context layers, base model", "E-shuf": "E-shuf: shuffled context",
        "F": "F: random history", "L": "L: A + personal LoRA", "L+E": "L+E: all layers + personal LoRA"}
 rows = [f"{lab['A']} & {fmt(v['A']['top1'])} & & & \\\\"]
-for k in ("E", "E-shuf", "F", "L", "L+E"):
+for k in ("C", "F", "E", "E-shuf", "L", "L+E"):
     d = vs[k]
     rows.append(f"{lab[k]} & {fmt(v[k]['top1'])} & {fmt(100*d['d_top1'],1)} & {ci([100*x for x in d['ci95_cluster_boot']],1)} & {d['days_with_gain']}/{d['days']}\\\\")
 (T / "clone.tex").write_text("\\begin{tabular}{lrrrr}\\toprule\nVariant & Top-1 & $\\Delta$ vs.\\ A (pts) & 95\\% CI & Days with gain\\\\\\midrule\n"
@@ -93,8 +93,8 @@ rows = []
 for pool, f in (("Primary", "metrics_test_primary"), ("Secondary", "metrics_test_secondary_fullpool")):
     for h, k in pairs:
         P = N[f]["paired"][k]
-        rows.append(f"{pool} & {h} & " + " & ".join(f"{fmt(P[m]['diff'])} {ci(P[m]['ci'],2)}" for m in ("recall@1", "recall@3", "recall@5")) + "\\\\")
-(T / "secondary_endpoints.tex").write_text("\\begin{tabular}{llrrr}\\toprule\nPool & Hypothesis & recall@1 & recall@3 & recall@5\\\\\\midrule\n" + "\n".join(rows) + "\n\\bottomrule\n\\end{tabular}\n")
+        rows.append(f"{pool} & {h} & " + " & ".join(f"{fmt(P[m]['diff'])} {ci(P[m]['ci'],3,True)}" for m in ("recall@1", "recall@3", "recall@5")) + "\\\\")
+(T / "secondary_endpoints.tex").write_text("\\resizebox{\\linewidth}{!}{\\begin{tabular}{llrrr}\\toprule\nPool & Hypothesis & recall@1 & recall@3 & recall@5\\\\\\midrule\n" + "\n".join(rows) + "\n\\bottomrule\n\\end{tabular}}\n")
 
 # ---- Macros for counts used in prose and captions
 SW = N["scored_weeks"]; PP = N["pool_primary"]; PS = N["pool_secondary"]
@@ -107,6 +107,8 @@ for pool, tag in (("primary", "P"), ("secondary", "S")):
               mac(f"n{tag}{st}Weeks", w["weeks_total"]), mac(f"n{tag}{st}Scored", w["weeks_scored"]),
               mac(f"n{tag}{st}ScoredExp", f"{w['exposures_scored']:,}"), mac(f"n{tag}{st}Median", f"{w['median_set_scored']:g}"),
               mac(f"n{tag}{st}Rate", f"{100*w['positive_rate']:.0f}")]
+JD = N["judgments_by_period"]["dev"]["gemma"]
+M += [mac("nDevJudged", f"{JD['n']:,}"), mac("nDevJudgedPos", f"{JD['positives']:,}")]
 M += [mac("qwenAutoPct", f"{100*N['qwen_automated_share_weak']:.0f}"), mac("gemmaAutoPct", f"{100*N['automated_share_weak']:.1f}"),
       mac("aucPrimaryTest", f"{N['auc']['primary']['all'][1]:.3f}"), mac("aucSecondaryTest", f"{N['auc']['secondary']['all'][1]:.3f}")]
 (T / "numbers.tex").write_text("\n".join(M) + "\n")

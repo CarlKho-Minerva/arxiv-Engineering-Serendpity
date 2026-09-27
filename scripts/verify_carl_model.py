@@ -117,7 +117,8 @@ def main():
            "pool_exclude": sorted(POOL_EXCLUDE), "n_candidates": 5, "chance": 0.20,
            "variants": {v: pooled(t, v, POOL_EXCLUDE) for v in sorted(t)},
            "vs_A": {v: paired(t, "A", v, POOL_EXCLUDE, rng) for v in sorted(t) if v != "A"},
-           "per_family_L_vs_A": per_family(t, "A", "L")}
+           "per_family_L_vs_A": per_family(t, "A", "L"),
+           "H2_C_vs_F": paired(t, "F", "C", POOL_EXCLUDE, rng)}
     # random gate: shuffle gold index
     res["random_gate_note"] = "gold_index shuffle gate reproduced in original evaluate.py; not re-run here"
     # event model (separate meta + scores files)
