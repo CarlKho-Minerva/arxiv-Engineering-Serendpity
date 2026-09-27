@@ -197,3 +197,47 @@ code on disk has small uncommitted diffs relative to the run.
 | Video metadata | same zip, `video metadata/videos*.csv`, `video recordings*.csv`, `video texts*.csv` | metadata | CSV | same | 15 files | derived | copied to `data/raw/yt_meta/` (ignored) |
 
 Hours by year: 2016–2020 ≈ 6 h; 2021 114; 2022 82; 2023 106; 2024 159; 2025 194; 2026 38. 257 videos ≥ 1 h (534 h). YouTube category (not reliable for work vs play): Gaming 415 h, People 208 h, other 76 h. Privacy: 418 unlisted, 413 public, 85 private.
+
+## 7. Complete archive survey (2026-09-27)
+
+Method: every store in the PC file catalog (`~/.local/state/lifeos/catalog/catalog_all.db`, 7.4 M entries: D:, E:, F:, C:\T7-mirror, three <account-A> Takeouts, the Minerva Takeout, the Mac restic backup, the 48 GB Mac, five Google Drives, Immich, B2), swept for video/audio collections and by keyword, plus the file tables of every export zip that was never indexed (the <account-B> Takeouts, Instagram, LinkedIn, capstone archives), plus timestamp spans read from the activity logs themselves. No message or document content was printed.
+
+**Long-running records (≥ 3 years), by what they capture**
+
+| record | span | size | captures | used in paper |
+|---|---|---|---|---|
+| Messages, 9 platforms | 2011–2026 | 3.08 M messages | who reached out, who replied | **yes** |
+| YouTube channel videos, <account-A> | 2016–2026 (≈ 690 h since 2021) | 916 videos, ≈ 700 h, 2.5 TB | livestreams and uploads: work sessions, gameplay, daily life (titles do not separate them) | no |
+| YouTube channel videos, <account-B> (high-school account) | ? | 17 videos, 20 GB | uploads | no |
+| Google My Activity: YouTube | 2013–2026 | 85,042 entries | his YouTube actions | no |
+| Google My Activity: Search | 2013–2026 | 64,587 entries | his searches | no |
+| YouTube watch history | 2020–2026 | 67,806 entries | videos he watched | no |
+| YouTube search history | 2019–2026 | 12,429 entries | his YouTube searches | no |
+| Google My Activity: Play Store, Image Search, Maps, Lens, Assistant, … | 2014–2026 | ≈ 30 k entries | app and search actions | no |
+| Google ad activity | 2017–2026 | 4,469 entries | ads he **visited or used** (not impressions) | no |
+| Facebook groups and events visited | 2012–2026 | 1,181 entries | communities he opened | no |
+| Facebook items viewed / shows watched | 2020–2026 / 2017–2023 | 74 / 102 | marketplace items, shows | no |
+| Instagram suggested profiles viewed | **2017–2020** | 501 entries | **recommender output he engaged with** | no |
+| Instagram "not interested" feedback | 2023–2026 | ≈ 10 entries | his feedback on recommendations | no |
+| Gmail (3 accounts) | 2013–2026 | 6,482 paired messages (+ mbox 6.5 GB) | email | messages only |
+| Photos and videos (Google Photos → Immich) | 2010–2026, mostly 2021–2026 | ≈ 80 k assets | camera roll | no |
+| Google Drive (<account-B>, school) | 2009–2025 | ≈ 2,400 files incl. school presentations | schoolwork, personal files | no |
+| Google Fit daily activity (<account-B>) | 2020–2025 | 836 days + 1,111 activities | steps, activity | no |
+| Google Health export | 2023–2026 | ≈ 3,000 files | activity, health | no |
+| Spotify streaming history (2 accounts) | 2014–2026 | yearly files | listening | no |
+| AI conversations (ChatGPT, AI Studio, Claude, Codex) | 2023–2026 | ≈ 12 k conversations | intent, questions, work | no |
+
+**Shorter but dense records**
+
+| record | span | size | captures |
+|---|---|---|---|
+| Screen Studio projects | 2024-08 → 2026 | 53 projects | screen video **with keystroke and cursor logs** (`recording/keystrokes-0.json`) |
+| Capstone pomodoro sessions | late 2025 | 253 sessions | per session: screenshots, audio, raw log (intent notes) |
+| Capstone progress logs | 2025-09 → 2026-03 | ≈ 100 entries | project journal |
+| Google Recorder (Minerva) | dates not read | 911 recordings, 15 GB | voice notes, meetings |
+| Google Voice calls (<account-B>) | 2024–2026 | 1,095 records | calls |
+| Notion export | content dates not read | 6,001 pages | notes |
+| iPhone backup (iMazing, 2026-08-23) | message DB only 3.5 MB | — | short iMessage history |
+| LifeOS capture lanes | 2026-07 → 2026-09 | see §3 | screen, input, audio, gaze, location, cameras |
+
+**Gaps in this survey:** the 48 GB Mac's listing is incomplete (ssh blocked by an unaccepted Xcode license on that Mac), the legacy `gdrive:` remote is unauthorised, the Backblaze archive repo has no snapshots, and the 2026-09-15 <account-A> Takeout was catalogued but not separately profiled (it repeats the 09-06 contents).

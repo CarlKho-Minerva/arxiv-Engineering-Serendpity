@@ -8,7 +8,9 @@ ab = re.search(r"\\begin\{abstract\}(.*?)\\end\{abstract\}", s, re.S).group(1)
 t = ab.replace("\\%", "%").replace("``", '"').replace("''", '"').replace("$", "").replace("{", "").replace("}", "")
 t = re.sub(r"\s+", " ", t).strip()
 assert "\\" not in t, t
-pages = "17"
+import subprocess
+pages = subprocess.run(["pdfinfo", str(ROOT / "dist" / "main.pdf")], capture_output=True, text=True).stdout.split("Pages:")[1].split()[0]
+n_tab = s.count("\\begin{table}"); n_fig = s.count("\\begin{figure}")
 out = f"""arXiv submission metadata
 
 Title:
@@ -21,7 +23,7 @@ Abstract ({len(t)} characters; arXiv limit 1,920):
 {t}
 
 Comments:
-{pages} pages, 4 figures, 9 tables. Pre-registration, code and aggregate results: https://github.com/CarlKho-Minerva/arxiv-Engineering-Serendpity (tag annotation-v1)
+{pages} pages, {n_fig} figures, {n_tab} tables. Pre-registration, code and aggregate results: https://github.com/CarlKho-Minerva/arxiv-Engineering-Serendpity (tag annotation-v1)
 
 Primary category: cs.LG (Machine Learning)
 Cross-lists: cs.IR (Information Retrieval), cs.HC (Human-Computer Interaction)
