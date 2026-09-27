@@ -143,3 +143,31 @@ Runner fix: policies with heavy ties (novelty, popularity) and the random/ε-gre
 5. Second judge (Qwen3-8B, MLX, both Macs): the substantive finding replicates. On the same 1,610 labelled exposures, consequential weak ties are less often invitations (Qwen 0.05 vs 0.17; Gemma 0.11 vs 0.26), less often organizational (0.05 vs 0.23; 0.15 vs 0.36), and more often personal chat (0.56 vs 0.43; 0.59 vs 0.36). Inter-judge κ: invitation 0.68, organization 0.68, marketing 0.68, social 0.62, expects-reply 0.38, automated 0.38.
 
 Implication: as a paper result, the honest statement is "on one subject's fifteen years of inbound messages, the exposures that became lasting ties were casual first messages from new people; a relevance ranker suppresses them, a novelty ranker recovers them slightly better than chance, and hand-built uncertainty/information-gain/option-value bonuses add nothing." The test split remains untouched pending Tier B labels and the protocol freeze (candidate pool: weak-tie ∧ Gemma p_automated ≤ 0.5; primary comparison: novelty and hybrid vs random-with-diversity at k ∈ {1, 3}; 20-seed averaging).
+
+### Inter-judge agreement on all 3,719 weak-tie exposures (Qwen3-8B MLX on both Macs vs Gemma 4 31B on the PC, both AnyJev L0)
+
+| judgment | mean Qwen3-8B | mean Gemma-31B | binary agreement | Cohen κ | Pearson r |
+|---|---|---|---|---|---|
+| p_invites_action | 0.177 | 0.263 | 0.898 | 0.705 | 0.738 |
+| p_expects_reply | 0.44 | 0.552 | 0.687 | 0.383 | 0.417 |
+| p_org_or_group | 0.234 | 0.374 | 0.856 | 0.668 | 0.72 |
+| p_automated | 0.117 | 0.362 | 0.752 | 0.371 | 0.486 |
+| p_exposure_type_social | 0.42 | 0.372 | 0.808 | 0.599 | 0.627 |
+| p_exposure_type_invitation | 0.146 | 0.074 | 0.896 | 0.476 | 0.543 |
+| p_exposure_type_transactional | 0.102 | 0.303 | 0.796 | 0.406 | 0.517 |
+| p_exposure_type_marketing | 0.133 | 0.145 | 0.921 | 0.672 | 0.696 |
+| ev_option_value | 1.819 | 1.13 |  |  | 0.515 |
+
+### Robustness to the judge defining the automated filter (validation, 20-seed baselines)
+
+Candidate pool filtered with **Qwen3-8B** p_automated ≤ 0.5 instead of Gemma's (Qwen flags 12% of weak-tie messages, Gemma 36%; κ 0.37): 63 weeks, candidate set mean 8.0. Reply model trained on candidates only (Qwen judgments cover candidates only), val AUC 0.585.
+
+| policy | recall@1 | recall@3 | recall@5 | MRR |
+|---|---|---|---|---|
+| relevance | 0.077 [0.02, 0.15] | 0.339 [0.23, 0.45] | 0.551 [0.44, 0.66] | 0.293 |
+| hybrid | 0.118 [0.05, 0.19] | 0.344 [0.25, 0.45] | 0.679 [0.58, 0.78] | 0.325 |
+| random | 0.150 [0.12, 0.19] | 0.436 [0.37, 0.50] | 0.657 [0.59, 0.73] | 0.362 |
+| random_diversity | 0.146 [0.12, 0.18] | 0.493 [0.42, 0.57] | 0.700 [0.63, 0.77] | 0.374 |
+| novelty | 0.169 [0.14, 0.21] | 0.510 [0.42, 0.60] | 0.687 [0.61, 0.77] | 0.391 |
+
+Same ordering as with Gemma's filter: relevance < hybrid < random ≤ random-with-diversity < novelty, intervals overlapping. The ordering is not an artifact of which model defines "automated". Files: `results/metrics_val_qwenfilter.json`, `data/derived/judgments_qwen8b.parquet` (git-ignored).
