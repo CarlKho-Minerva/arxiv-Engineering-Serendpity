@@ -80,7 +80,7 @@ Here $\mathrm{rel}$ is the ensemble mean of $\hat{p}$ and $\mathrm{unc}$ its sta
 \section{Data}
 \label{sec:data}
 
-\paragraph{Subject and archive.} The subject is the author. He began keeping digital records in secondary school and later added continuous screen, input, audio, location and wearable capture. Table~\ref{tab:sources} lists the only modality that spans the full fifteen years: messages. Denser streams (screen, input, attention, location, cameras) exist only from July to September 2026 and are used here only by the behavioral-cloning experiment. Platform exports fall into two kinds. Activity logs of the subject's own actions, such as watch and search history, span years. Records of what recommenders showed him (a feed-exposure log, suggested people, inferred ad interests) exist only as single snapshots from July to September 2026 (Section~\ref{sec:mirrors}).
+\paragraph{Subject and archive.} The subject is the author. He began keeping digital records in secondary school and later added continuous screen, input, audio, location and wearable capture. Messages (Table~\ref{tab:sources}) are the only modality we have processed across the full fifteen years. A second long-running record exists but is not used here: 916 videos the subject streamed or uploaded to YouTube between 2016 and 2026, about 700 hours in total, almost all of it since 2021 and much of it live sessions of him working or playing. Denser capture streams (screen, input, attention, location, cameras) exist only from July to September 2026 and are used here only by the behavioral-cloning experiment. Platform exports fall into two kinds. Activity logs of the subject's own actions, such as watch and search history, span years. Records of what recommenders showed him (a feed-exposure log, suggested people, inferred ad interests) exist only as single snapshots from July to September 2026 (Section~\ref{sec:mirrors}).
 
 \begin{table}[t]
 \centering
@@ -241,7 +241,7 @@ Second, the obvious fix did not work. UCB and Thompson sampling inherit the rele
 
 Third, predicting a person and augmenting them are different problems. A small adapter adds ten points to next-action prediction for the same subject, so his short-term behavior is partly predictable. A separate model of his engagement, trained on his earlier years, ranks the exposures that later lasted below random. The two models differ in data and target, so this is consistent with, not proof of, the idea that a clone inherits its source's blind spots.
 
-The eventual problem is belief-state control with the person in the loop. The natural next step is prospective: a small daily exposure budget, randomized between policies, with outcomes measured over months. The retrospective benchmark here sets the baseline such a study should beat.
+The stream archive described in Section~\ref{sec:data} is the obvious next source: years of the subject's own screen and camera activity could give the belief state far more than message metadata does. The eventual problem is belief-state control with the person in the loop. The natural next step is prospective: a small daily exposure budget, randomized between policies, with outcomes measured over months. The retrospective benchmark here sets the baseline such a study should beat.
 
 \section{Conclusion}
 

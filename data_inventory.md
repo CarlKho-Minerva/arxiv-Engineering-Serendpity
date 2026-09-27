@@ -188,3 +188,12 @@ code on disk has small uncommitted diffs relative to the run.
 - No local relationship graph; kith/kindle data on OpenHost.
 - Locked evaluation window (carl-model draft protocol): all days after 2026-09-16.
   This repo does not read them.
+
+## 6. YouTube stream and upload archive (added 2026-09-27; missed in the first inventory)
+
+| source | path | modality | format | range | size / count | privacy | status |
+|---|---|---|---|---|---|---|---|
+| Channel videos (<account-A> Takeout 2026-09-06, all archives CRC+sha256 verified) | `D:\<account-A>-takeout-20260906\*-5-*.zip` → `Takeout/YouTube and YouTube Music/videos/` | screen + camera video, audio | mp4 596, webm 318, mkv 2 | 2016-02 → 2026-09-03 | 916 videos, ~700 h, 2.5 TB | raw-private (third parties on screen and camera) | **not processed** |
+| Video metadata | same zip, `video metadata/videos*.csv`, `video recordings*.csv`, `video texts*.csv` | metadata | CSV | same | 15 files | derived | copied to `data/raw/yt_meta/` (ignored) |
+
+Hours by year: 2016–2020 ≈ 6 h; 2021 114; 2022 82; 2023 106; 2024 159; 2025 194; 2026 38. 257 videos ≥ 1 h (534 h). YouTube category (not reliable for work vs play): Gaming 415 h, People 208 h, other 76 h. Privacy: 418 unlisted, 413 public, 85 private.
