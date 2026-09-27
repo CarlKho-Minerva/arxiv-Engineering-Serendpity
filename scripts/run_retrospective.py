@@ -95,6 +95,20 @@ def bootstrap(per_day: pd.DataFrame, metric: str, rng: np.random.Generator, n=20
             for p in piv.columns}
 
 
+PAIRS = [("novelty", "random_diversity"), ("hybrid", "random_diversity"), ("hybrid", "novelty"),
+         ("relevance", "random"), ("novelty", "relevance"), ("hybrid", "relevance")]
+PAIR_METRICS = ["mrr", "recall@1", "recall@3", "recall@5"]
+
+
+def paired(per_day: pd.DataFrame, a: str, b: str, metric: str, rng: np.random.Generator, n=5000) -> dict:
+    """Mean over weeks of (a - b), cluster bootstrap over weeks; p_le0 = share of boots <= 0."""
+    piv = per_day.pivot_table(index="day", columns="policy", values=metric)[[a, b]].dropna()
+    d = (piv[a] - piv[b]).to_numpy()
+    boots = np.array([d[rng.integers(0, len(d), len(d))].mean() for _ in range(n)])
+    return {"diff": float(d.mean()), "ci95": [float(np.quantile(boots, .025)), float(np.quantile(boots, .975))],
+            "p_le0": float((boots <= 0).mean()), "weeks": int(len(d))}
+
+
 def tune_hybrid(val: pd.DataFrame, rng: np.random.Generator) -> Weights:
     grid = [0.0, 0.25, 0.5, 1.0]
     best, best_w = -1.0, Weights()
@@ -122,6 +136,10 @@ def main():
     ap.add_argument("--seeds", type=int, default=20, help="stochastic policies are averaged over this many seeds per day")
     ap.add_argument("--split-eval", choices=["val", "test"], default="test",
                     help="evaluate on val while the annotation protocol is unfrozen; test only after the freeze")
+    ap.add_argument("--tag", default=None, help="suffix for output files (metrics_<split>_<tag>.json)")
+    ap.add_argument("--permute-labels", action="store_true",
+                    help="negative control: shuffle the label across candidates within each week (seeded)")
+    ap.add_argument("--export-ranks", action="store_true", help="write per-exposure ranks for Figure 2 (git-ignored parquet)")
     a = ap.parse_args()
     rng = np.random.default_rng(a.seed)
     if a.real:
@@ -144,9 +162,12 @@ def main():
     else:
         tuned = Weights(relevance=1.0, uncertainty=0.5, novelty=0.5, info_gain=0.5, option_value=0.5, cost=0.25).as_dict()
         policies["hybrid"] = hybrid_policy(Weights(**tuned))
-    test = df[df["split"] == a.split_eval]
+    test = df[df["split"] == a.split_eval].copy()
+    if a.permute_labels:
+        prng = np.random.default_rng(12345)
+        test[LABEL] = test.groupby("day")[LABEL].transform(lambda s: prng.permutation(s.to_numpy()))
     STOCHASTIC = {"random", "random_diversity", "epsilon_greedy", "thompson", "novelty", "popularity"}  # last two: heavy ties, broken at random
-    rows = []
+    rows, rank_rows = [], []
     for day, d in test.groupby("day"):
         if d[LABEL].sum() == 0:
             continue
@@ -164,9 +185,23 @@ def main():
         for name, grp in accdf.groupby("policy"):
             row = grp.drop(columns="policy").mean(numeric_only=True).to_dict()
             row["policy"] = name; row["day"] = day; rows.append(row)
+        if a.export_ranks:
+            feats = dd[[c for c in FEATURES if c in dd.columns]]
+            r_rel = ranks_from_scores(pols["relevance"](feats, np.random.default_rng(0)))
+            r_hyb = ranks_from_scores(pols["hybrid"](feats, np.random.default_rng(0)))
+            r_nov = np.mean([ranks_from_scores(pols["novelty"](feats, np.random.default_rng(a.seed * 1000 + sd)))
+                             for sd in range(a.seeds)], axis=0)
+            for i in range(len(dd)):
+                rank_rows.append({"t": dd["t"].iloc[i] if "t" in dd.columns else day, "week": day,
+                                  "consequential": int(dd[LABEL].iloc[i]), "n_candidates": len(dd),
+                                  "rank_exploit": int(r_rel[i]), "rank_explore": float(r_nov[i]),
+                                  "rank_hybrid": int(r_hyb[i])})
     per_day = pd.DataFrame(rows)
     set_sizes = test.groupby("day").size()
     metrics = {m: bootstrap(per_day, m, rng) for m in ["mrr"] + [f"{s}@{k}" for s in ("recall", "ndcg", "coverage", "novelty") for k in KS]}
+    prng2 = np.random.default_rng(a.seed + 7)
+    paired_stats = {f"{x}-{y}": {m: paired(per_day, x, y, m, prng2) for m in PAIR_METRICS}
+                    for x, y in PAIRS if x in per_day["policy"].values and y in per_day["policy"].values}
     out = {"synthetic": synthetic,
            "eval_split": a.split_eval,
            "note": "SYNTHETIC FIXTURE: numbers illustrate the pipeline only. Not a result." if synthetic
@@ -175,9 +210,15 @@ def main():
            "n_test_days_with_positives": int(per_day["day"].nunique()),
            "candidate_set_size": {"mean": float(set_sizes.mean()), "median": float(set_sizes.median()),
                                   "p90": float(set_sizes.quantile(.9)), "max": int(set_sizes.max())},
-           "hybrid_weights": tuned, "hybrid_tuned_on": tune_split if not synthetic else None, "stochastic_seeds": a.seeds, "ks": list(KS), "metrics": metrics}
+           "hybrid_weights": tuned, "hybrid_tuned_on": tune_split if not synthetic else None, "stochastic_seeds": a.seeds, "ks": list(KS), "metrics": metrics,
+           "paired": paired_stats, "permute_labels": a.permute_labels, "tag": a.tag,
+           "n_candidates_eval": int(len(test)), "n_positives_eval": int(test[LABEL].sum())}
     (ROOT / "results").mkdir(exist_ok=True)
-    (ROOT / "results" / ("metrics.json" if synthetic else f"metrics_{a.split_eval}.json")).write_text(json.dumps(out, indent=1))
+    suffix = f"_{a.tag}" if a.tag else ""
+    (ROOT / "results" / ("metrics.json" if synthetic else f"metrics_{a.split_eval}{suffix}.json")).write_text(json.dumps(out, indent=1))
+    if a.export_ranks and rank_rows:
+        (ROOT / "results" / "retrospective").mkdir(parents=True, exist_ok=True)
+        pd.DataFrame(rank_rows).to_parquet(ROOT / "results" / "retrospective" / f"exposures_ranked_{a.split_eval}{suffix}.parquet", index=False)
     # markdown table
     lines = [f"# Retrospective serendipity — {'SYNTHETIC FIXTURE (not a result)' if synthetic else a.split_eval + ' split (real, Tier A labels)'}", "",
              f"generated {out['generated']}; weeks with positives: {out['n_test_days_with_positives']}; candidate set size mean {out['candidate_set_size']['mean']:.1f} / median {out['candidate_set_size']['median']:.0f} / p90 {out['candidate_set_size']['p90']:.0f}; hybrid weights {tuned} (tuned on {out.get('hybrid_tuned_on')})", "",
@@ -186,7 +227,11 @@ def main():
         cells = [f"{metrics[f'recall@{k}'][p]['mean']:.3f} [{metrics[f'recall@{k}'][p]['ci95'][0]:.2f},{metrics[f'recall@{k}'][p]['ci95'][1]:.2f}]" for k in KS]
         lines.append(f"| {p} | " + " | ".join(cells) + f" | {metrics['mrr'][p]['mean']:.3f} | {metrics['coverage@5'][p]['mean']:.2f} | {metrics['novelty@5'][p]['mean']:.2f} |")
     (ROOT / "results" / "tables").mkdir(exist_ok=True, parents=True)
-    (ROOT / "results" / "tables" / ("retrospective_synthetic.md" if synthetic else f"retrospective_{a.split_eval}.md")).write_text("\n".join(lines) + "\n")
+    lines += ["", "Paired differences (row policy minus column policy), cluster bootstrap over weeks:", "",
+              "| comparison | " + " | ".join(PAIR_METRICS) + " |", "|---|" + "---|" * len(PAIR_METRICS)]
+    for key, st in paired_stats.items():
+        lines.append(f"| {key} | " + " | ".join(f"{st[m]['diff']:+.3f} [{st[m]['ci95'][0]:+.3f}, {st[m]['ci95'][1]:+.3f}] p≤0={st[m]['p_le0']:.3f}" for m in PAIR_METRICS) + " |")
+    (ROOT / "results" / "tables" / ("retrospective_synthetic.md" if synthetic else f"retrospective_{a.split_eval}{suffix}.md")).write_text("\n".join(lines) + "\n")
     print("\n".join(lines))
 
 

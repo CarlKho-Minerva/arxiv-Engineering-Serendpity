@@ -1,11 +1,11 @@
 {
- "generated": "2026-09-27T06:41:13+00:00",
+ "generated": "2026-09-27T19:15:38+00:00",
  "horizon_days": 365,
  "candidates": "weak",
  "content": true,
- "train_on": "candidates",
+ "train_on": "all",
  "judgments": true,
- "judgments_file": "judgments_qwen8b.parquet",
+ "judgments_file": "judgments.parquet",
  "novelty": "meta",
  "exclude_automated": 0.5,
  "split": {
@@ -17,21 +17,21 @@
  },
  "stream_end": "2026-09-15 02:54:32+00:00",
  "n": {
-  "train": 741,
-  "val": 837,
-  "test": 594
+  "train": 8052,
+  "val": 9670,
+  "test": 6067
  },
  "positives": {
-  "train": 135,
-  "val": 131,
-  "test": 44
+  "train": 5263,
+  "val": 5831,
+  "test": 3693
  },
  "weeks_with_positives": {
-  "train": 96,
-  "val": 63,
-  "test": 34
+  "train": 83,
+  "val": 56,
+  "test": 30
  },
- "relevance_auc_val": 0.5854481513164147,
+ "relevance_auc_val": 0.6655311271422574,
  "relevance_auc_test_NOT_TO_BE_READ_BEFORE_FREEZE": null,
  "features": [
   "new",

@@ -1,8 +1,9 @@
-# Trajectory-event annotation protocol (v0.1, to be frozen before test-period evaluation)
+# Trajectory-event annotation protocol (v1.0, FROZEN 2026-09-27, git tag `annotation-v1`)
 
-**Status: DRAFT. Not yet frozen.** Freezing = tagging this file `annotation-v1` in git
-and recording the commit hash in `results/split.json` before any policy is run on
-the test period.
+**Status: FROZEN** at git tag `annotation-v1` before any policy was run on the test
+period. Test-split analysis plan: `PREREGISTRATION.md`. Tier A thresholds as implemented
+in `src/ingest/exposures_from_messages.py`: `tie_persisted_365 AND bursts_365 >= 5`. The
+`new_context` clause could not be computed (thread hashes are per source) and is dropped.
 
 ## Unit
 

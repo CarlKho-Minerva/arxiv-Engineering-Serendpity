@@ -81,6 +81,7 @@ def main():
     ap.add_argument("--train-on", choices=["candidates", "all"], default="candidates",
                     help="fit the reply model on train-period candidates only, or on every train-period exposure")
     ap.add_argument("--pca", type=int, default=32)
+    ap.add_argument("--post-freeze", action="store_true", help="also report reply-model AUC on the test split (only after the annotation-v1 freeze)")
     ap.add_argument("--judgments", action="store_true", help="add AnyJev typed-judgment features (data/derived/judgments.parquet)")
     ap.add_argument("--judgments-file", default="judgments.parquet", help="file under data/derived/ to read judgments from (e.g. judgments_qwen8b.parquet)")
     ap.add_argument("--exclude-automated", type=float, default=None, metavar="P",
@@ -202,13 +203,14 @@ def main():
     # relevance-model sanity on val (AUC) — the clone-of-engagement half of the table
     from sklearn.metrics import roc_auc_score
     va = ((df["split"] == "val") & df["is_candidate"]).to_numpy()
+    te = ((df["split"] == "test") & df["is_candidate"]).to_numpy()
     info = {"generated": dt.datetime.now(UTC).isoformat(timespec="seconds"), "horizon_days": H, "candidates": a.candidates, "content": a.content, "train_on": a.train_on, "judgments": a.judgments, "judgments_file": a.judgments_file, "novelty": a.novelty, "exclude_automated": a.exclude_automated,
             "split": {k: (v.isoformat() if isinstance(v, dt.datetime) else v) for k, v in dataclasses.asdict(split).items()},
             "stream_end": str(stream_end), "n": {s: int((df["split"] == s).sum()) for s in ("train", "val", "test")},
             "positives": {s: int(df.loc[df["split"] == s, f"consequential_auto_{H}"].sum()) for s in ("train", "val", "test")},
             "weeks_with_positives": {s: int(out.loc[(out["split"] == s) & (out["consequential"] == 1), "day"].nunique()) for s in ("train", "val", "test")},
             "relevance_auc_val": float(roc_auc_score(y[va], P.mean(0)[va])) if va.sum() and len(set(y[va])) > 1 else None,
-            "relevance_auc_test_NOT_TO_BE_READ_BEFORE_FREEZE": None,
+            "relevance_auc_test": (float(roc_auc_score(y[te], P.mean(0)[te])) if a.post_freeze and te.sum() and len(set(y[te])) > 1 else None),
             "features": list(X.columns), "ensemble_members": a.members}
     (ROOT / "results" / "split.json").write_text(json.dumps(info, indent=1))
     print(json.dumps({k: v for k, v in info.items() if k != "features"}, indent=1))
