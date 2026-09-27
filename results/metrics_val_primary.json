@@ -2,7 +2,7 @@
  "synthetic": false,
  "eval_split": "val",
  "note": "Real retrospective evaluation on the chronological val split (weak-tie exposures, Tier A labels).",
- "generated": "2026-09-27T19:15:44+00:00",
+ "generated": "2026-09-27T19:17:50+00:00",
  "n_test_days_with_positives": 56,
  "candidate_set_size": {
   "mean": 6.4,
@@ -1483,7 +1483,7 @@
   }
  },
  "permute_labels": false,
- "tag": "dryrun_primary",
+ "tag": "primary",
  "n_candidates_eval": 672,
  "n_positives_eval": 113
 }

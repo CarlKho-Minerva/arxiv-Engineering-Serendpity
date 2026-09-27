@@ -1,0 +1,10 @@
+\begin{tabular}{lrrrr}\toprule
+Variant & Top-1 & $\Delta$ vs.\ A (pts) & 95\% CI & Days with gain\\\midrule
+A: immediate situation & 0.280 & & & \\
+E: all context layers, base model & 0.256 & $-$2.4 & [$-$4.6, 0.2] & 7/21\\
+E-shuf: shuffled context & 0.241 & $-$4.0 & [$-$6.1, $-$1.4] & 4/21\\
+F: random history & 0.248 & $-$3.2 & [$-$5.4, $-$1.2] & 5/21\\
+L: A + personal LoRA & 0.378 & 9.8 & [6.8, 13.4] & 20/21\\
+L+E: all layers + personal LoRA & 0.382 & 10.1 & [7.0, 14.1] & 19/21\\
+\bottomrule
+\end{tabular}

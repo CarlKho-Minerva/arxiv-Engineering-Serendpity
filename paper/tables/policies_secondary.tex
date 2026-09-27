@@ -1,0 +1,15 @@
+\begin{tabular}{lrrrr}\toprule
+ & \multicolumn{2}{c}{Validation 2021--2022} & \multicolumn{2}{c}{Held-out test 2024--2025}\\
+\cmidrule(lr){2-3}\cmidrule(lr){4-5}
+Policy & MRR & recall@1 & MRR [95\% CI] & recall@1\\\midrule
+Relevance-only (reply model) & 0.296 & 0.115 & 0.193 [0.15, 0.25] & 0.038\\
+UCB (relevance + uncertainty) & 0.288 & 0.115 & 0.181 [0.14, 0.24] & 0.026\\
+Thompson sampling & 0.298 & 0.112 & 0.192 [0.15, 0.25] & 0.039\\
+Hybrid exploration score & 0.310 & 0.106 & 0.182 [0.15, 0.23] & 0.013\\
+$\varepsilon$-greedy ($\varepsilon=0.2$) & 0.329 & 0.136 & 0.275 [0.24, 0.31] & 0.106\\
+Random & 0.343 & 0.135 & 0.320 [0.29, 0.35] & 0.107\\
+Random with diversity budget & 0.346 & 0.117 & 0.339 [0.31, 0.38] & 0.124\\
+New-person-first (novelty) & 0.368 & 0.148 & 0.312 [0.27, 0.35] & 0.120\\
+Platform popularity$^\dagger$ & 0.356 & 0.151 & 0.430 [0.33, 0.53] & 0.241\\
+\bottomrule
+\end{tabular}

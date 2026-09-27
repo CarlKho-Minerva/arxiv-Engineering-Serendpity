@@ -96,7 +96,8 @@ def bootstrap(per_day: pd.DataFrame, metric: str, rng: np.random.Generator, n=20
 
 
 PAIRS = [("novelty", "random_diversity"), ("hybrid", "random_diversity"), ("hybrid", "novelty"),
-         ("relevance", "random"), ("novelty", "relevance"), ("hybrid", "relevance")]
+         ("relevance", "random"), ("novelty", "relevance"), ("hybrid", "relevance"),
+         ("popularity", "random_diversity")]  # last pair added post-freeze, exploratory only
 PAIR_METRICS = ["mrr", "recall@1", "recall@3", "recall@5"]
 
 

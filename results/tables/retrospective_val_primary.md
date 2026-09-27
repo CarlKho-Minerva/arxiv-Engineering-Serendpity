@@ -1,6 +1,6 @@
 # Retrospective serendipity — val split (real, Tier A labels)
 
-generated 2026-09-27T19:15:44+00:00; weeks with positives: 56; candidate set size mean 6.4 / median 5 / p90 13; hybrid weights {'relevance': 1.0, 'uncertainty': 0.25, 'novelty': 0.0, 'info_gain': 0.0, 'option_value': 1.0, 'cost': 0.25} (tuned on train)
+generated 2026-09-27T19:17:50+00:00; weeks with positives: 56; candidate set size mean 6.4 / median 5 / p90 13; hybrid weights {'relevance': 1.0, 'uncertainty': 0.25, 'novelty': 0.0, 'info_gain': 0.0, 'option_value': 1.0, 'cost': 0.25} (tuned on train)
 
 | policy | recall@1 | recall@3 | recall@5 | recall@10 | MRR | coverage@5 | novelty@5 |
 |---|---|---|---|---|---|---|---|

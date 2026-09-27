@@ -7,17 +7,14 @@ an agent that surfaces what the subject is failing to consider (an exploration
 policy), and whether that difference is measurable retrospectively on fifteen
 years of logged exposures and choices.
 
-**Status (2026-09-26, session 2):** inventory complete; prior clone result reproduced;
-E1 exposure table built from message metadata; validation-only retrospective run
-done (preliminary, unfavourable to the exploration terms as operationalized);
-demo and Figure 2 still on a synthetic fixture. No test-split result exists.
+**Status (2026-09-27):** protocol frozen (tag `annotation-v1`) and the held-out 2024–2025 test split opened once. Pre-registered verdicts: a relevance ranker buries later-lasting weak ties (**supported**); a hybrid uncertainty/information-gain/option-value score beats random exploration with equal diversity (**rejected**); new-person-first beats it (**inconclusive**). Manuscript in `paper/`.
 
 ## What is measured vs. proposed
 
 | | status |
 |---|---|
 | Behavioral clone (RQ1): personal LoRA lifts 5-way next-action top-1 from 28.0% to 37.8% (+9.8, CI [6.8, 13.4], 20/21 days) | **measured**, reproduced by `scripts/verify_carl_model.py` → `results/carl_model_verified.json` |
-| Retrospective serendipity ranking (RQ3–RQ5) | **E1 built; validation-only results** (35,168 contact events 2011–2026; AnyJev judgments on all of them; 20-seed baselines): relevance-only ranks later-consequential weak ties *below random*; the hybrid exploration score never beats random-with-diversity; novelty-only has a small edge with overlapping CIs. Consequential weak ties are casual first messages from new people, not opportunities (two judges agree). See `results/tables/E1_report.md`. Test split untouched until the annotation freeze. |
+| Retrospective serendipity ranking (RQ3–RQ5) | **Pre-registered test done** (`PREREGISTRATION.md`, `results/metrics_test_primary.json`): relevance − random MRR −0.138 [−0.200, −0.067]; hybrid − random-with-diversity −0.217 [−0.267, −0.164]; novelty − random-with-diversity −0.035 [−0.085, +0.013]. Two local judges agree later-lasting ties were personal chat, not invitations. |
 | Algorithmic-mirror time series (RQ2, RQ7) | **not testable**: recommendation exports are single 2026 snapshots |
 | Exploration rate across life periods (RQ6) | **exploratory pass done**: fig3 + yearly tables (messages) + Facebook friends/groups per month |
 
@@ -41,6 +38,7 @@ scripts/verify_carl_model.py   independent recomputation of the prior result
 scripts/run_retrospective.py   the centrepiece experiment (synthetic until real table exists)
 scripts/run_baselines.py       RQ3 premise check
 scripts/build_figures.py       SVG + PDF + PNG into paper/figures/
+PREREGISTRATION.md         frozen test-split analysis plan (tag annotation-v1)
 demo/app.py                Streamlit demo; demo/sample_data.json is SYNTHETIC
 demo/label_tier_b.py       Tier B labelling page (local, resumable, blind to rankings)
 src/features/judgments_anyjev.py  AnyJev L0 typed judgments via the PC's vLLM (Gemma 4 31B)

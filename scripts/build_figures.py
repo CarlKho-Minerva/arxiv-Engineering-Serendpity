@@ -17,6 +17,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from src.visualization.architecture import draw as draw_arch  # noqa: E402
 from src.visualization.counterfactual_timeline import draw as draw_cf  # noqa: E402
+from src.visualization.forest import draw as draw_forest  # noqa: E402
 
 FIG = ROOT / "paper" / "figures"
 
@@ -24,10 +25,18 @@ FIG = ROOT / "paper" / "figures"
 def main() -> None:
     for p in draw_arch(FIG):
         print("wrote", p.relative_to(ROOT))
-    real = ROOT / "results" / "retrospective" / "exposures_ranked.parquet"
+    if (ROOT / "results" / "metrics_test_primary.json").exists():
+        for p in draw_forest(ROOT / "results", FIG):
+            print("wrote", p.relative_to(ROOT))
+    real = ROOT / "results" / "retrospective" / "exposures_ranked_test_primary.parquet"
     if real.exists():
         df = pd.read_parquet(real)
-        for p in draw_cf(df, FIG, synthetic=False):
+        for p in draw_cf(df, FIG, synthetic=False, k=1, log_ranks=False,
+                         exploit_label="relevance-only rank (clone proxy)",
+                         explore_label="new-person-first rank (mean over 20 tie-breaks)",
+                         hybrid_label="hybrid exploration-score rank",
+                         stream_label="held-out test period: weak-tie inbound exposures stacked by week  (gray = ordinary · ring = became a lasting tie within 365 d)",
+                         stack_stream=True, rank_unit="week"):
             print("wrote", p.relative_to(ROOT))
     else:
         fx = json.loads((ROOT / "demo" / "sample_data.json").read_text())

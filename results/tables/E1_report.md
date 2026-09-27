@@ -171,3 +171,23 @@ Candidate pool filtered with **Qwen3-8B** p_automated ≤ 0.5 instead of Gemma's
 | novelty | 0.169 [0.14, 0.21] | 0.510 [0.42, 0.60] | 0.687 [0.61, 0.77] | 0.391 |
 
 Same ordering as with Gemma's filter: relevance < hybrid < random ≤ random-with-diversity < novelty, intervals overlapping. The ordering is not an artifact of which model defines "automated". Files: `results/metrics_val_qwenfilter.json`, `data/derived/judgments_qwen8b.parquet` (git-ignored).
+
+## TEST SPLIT (opened once, 2026-09-27 19:16 UTC, after freeze at tag `annotation-v1` = 8862642)
+
+Pre-registration: `PREREGISTRATION.md`. Commands run exactly as listed there.
+
+| hypothesis | validation | test | test, labels permuted | verdict |
+|---|---|---|---|---|
+| H-PREM relevance − random | -0.061 [-0.113, -0.002] | -0.138 [-0.200, -0.067] | +0.020 [-0.067, +0.110] | **supported** |
+| H-SER hybrid − random_diversity | -0.044 [-0.107, +0.028] | -0.217 [-0.267, -0.164] | -0.013 [-0.114, +0.092] | **rejected** |
+| H-NOV novelty − random_diversity | +0.021 [-0.018, +0.060] | -0.035 [-0.085, +0.013] | +0.007 [-0.058, +0.072] | **inconclusive** |
+
+Primary pool test: 30 weeks, 393 exposures, 36 later-lasting, median set 4. Hybrid weights (tuned on val): {'relevance': 1.0, 'uncertainty': 0.0, 'novelty': 0.5, 'info_gain': 0.0, 'option_value': 1.0, 'cost': 0.25}. Reply-model AUC test 0.671.
+
+Test MRR: clone 0.327, epsilon_greedy 0.399, hybrid 0.279, novelty 0.462, popularity 0.552, random 0.465, random_diversity 0.496, relevance 0.327, thompson 0.328, ucb 0.305
+
+Secondary pool (all weak ties): relevance−random -0.126 [-0.174, -0.065], hybrid−rd -0.157 [-0.193, -0.116], novelty−rd -0.027 [-0.067, +0.014]. Same verdicts.
+
+Exploratory (post-freeze, not pre-registered): platform popularity was the best test policy (MRR 0.552); popularity − random_diversity +0.056 [−0.040, +0.155] primary, +0.091 [−0.001, +0.186] secondary. Novelty's validation edge did not replicate.
+
+Bottom line: relevance buries later-lasting weak ties (replicated on held-out years); hand-built exploration bonuses do worse than random-with-diversity; new-person-first is not reliably better than random. Manuscript: `paper/main.pdf`.

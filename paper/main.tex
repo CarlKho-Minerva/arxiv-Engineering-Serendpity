@@ -1,133 +1,262 @@
 \documentclass[11pt]{article}
 \usepackage[margin=1in]{geometry}
+\usepackage[T1]{fontenc}
 \usepackage{amsmath,amssymb}
 \usepackage{graphicx}
 \usepackage{booktabs}
 \usepackage{xcolor}
-\usepackage{hyperref}
-\usepackage{natbib}
+\usepackage[hidelinks]{hyperref}
+\usepackage[numbers,sort&compress]{natbib}
 \usepackage{microtype}
+\usepackage{caption}
 \graphicspath{{figures/}}
+\captionsetup{font=small,labelfont=bf}
 
-% ---- status macros: every claim in this draft is tagged ----
-\newcommand{\measured}[1]{{\color{black}#1}}
-\newcommand{\proposed}[1]{{\color{blue!60!black}[Proposed: #1]}}
-\newcommand{\hypothesis}[1]{{\color{purple!70!black}[Hypothesis: #1]}}
-\newcommand{\todo}[1]{{\color{red}[TODO: #1]}}
-
-\title{Algorithmic Mirrors: Engineering Serendipity in Personal Agents\\Under Partial Observability\\
-\large A Longitudinal Single-Subject Study of Behavioral Cloning, Exploration, and Counterfactual Recommendation\\
-\normalsize \todo{title not final; lock after results}}
+\title{Engineering Serendipity in Personal Agents:\\
+A Pre-registered Fifteen-Year Single-Subject Test of\\ Exploitation versus Exploration}
 \author{Carl Kho\\ \small Independent researcher\\ \small \texttt{carl@themildlyusefulcompany.com}}
-\date{Draft skeleton, \today}
+\date{September 2026}
 
 \begin{document}
 \maketitle
 
 \begin{abstract}
-\todo{Write only after Sections 8--11 contain measured results.}
-A behavioral clone answers ``what would I do?''; an augmenting agent must answer ``what am I failing to consider?''
-We argue these are different objects, formalize the second as an exploration policy over a belief state, and test
-the difference retrospectively on one subject's fifteen-year record of logged exposures and choices.
-\measured{The clone half is measured: a personal LoRA raises held-out 5-way next-action prediction from 28.0\% to 37.8\% (chance 20\%; +9.8 points, 95\% CI [6.8, 13.4], gain on 20 of 21 test days).}
-\proposed{The exploration half is a pre-registered retrospective ranking experiment whose falsifier is stated in Section 7.}
+A personal agent trained on a person's own history can learn to answer the question ``what would I do?''. An agent meant to augment that person must also answer a different one: ``what am I failing to consider?''. We test whether the two come apart on one subject's fifteen-year record of 3.08 million messages across nine platforms. We frame the problem as retrospective ranking of weak-tie inbound exposures (a first message from a new person, or a message that revives a thread silent for six months), each with a delayed outcome: whether the tie was still active and had grown to at least five further conversations a year later. All features are computed from information available at exposure time. Message semantics come from typed judgments made by local language models and read as probabilities. After exploring the 2011 to 2022 data, we pre-registered the analysis and opened the 2024 to 2025 test period once. A ranker trained to predict which messages the subject would answer placed the exposures that became lasting ties below random order (difference in mean reciprocal rank $-0.14$, 95\% CI $[-0.20, -0.07]$). A hybrid exploration score combining epistemic uncertainty, an information-gain proxy and a judged option value did worse than random exploration with an equal diversity budget ($-0.22$, $[-0.27, -0.16]$). Ranking new people first was indistinguishable from that random baseline. Ties that lasted tended to begin as casual personal messages rather than the invitations and opportunities an option-value score is designed to reward, and two independent local judges agree on this. Separately, a personal LoRA adapter does predict the subject's next action (37.8\% versus 28.0\% top-1 in a five-way choice). In this record, then, the behavior can be cloned, while hand-built curiosity bonuses fail and random exploration with coverage is the baseline to beat. We release code and the pre-registration; the personal data stay private.
 \end{abstract}
 
 \section{Introduction}
-\todo{}
-Prediction asks what the subject will do. Augmentation asks what possibilities the subject is currently failing to consider.
-The behavioral clone models the first; the exploration mechanism exists because the second question is different.
 
-\section{Motivation and Problem Setting}
-\todo{Progression A--G from the research brief, written as motivation, not evidence.}
-\hypothesis{Many consequential transitions arose from exposures a then-current preference model would have ranked low.}
+People who record large parts of their lives accumulate something unusual: a long, dense trajectory of one agent acting in the world. The obvious use of such a record is imitation. Given enough of a person's history, a model can learn to predict what they will do next, and a personal agent built on that model can act in their style. Behavioral cloning of this kind is well understood \citep{pomerleau1991efficient,ross2011reduction}, and we report below that it works to a measurable degree on the subject of this study.
 
-\section{Related Work}
-\paragraph{Belief-state control and Bayes-adaptive RL.} \todo{\citep{kaelbling1998planning,duff2002optimal,guez2012efficient}}
-\paragraph{Contextual bandits and exploration.} \todo{\citep{auer2002finite,li2010contextual,russo2018tutorial,thompson1933likelihood}}
-\paragraph{Intrinsic motivation, curiosity, information gain.} \todo{\citep{houlsby2011bayesian,pathak2017curiosity,schmidhuber2010formal,klyubin2005empowerment}}
-\paragraph{Predictive state representations.} \todo{\citep{littman2002predictive,singh2004predictive}}
-\paragraph{The era of experience and continuing RL.} \todo{\citep{silver2025era,sutton2018reinforcement}}
-\paragraph{Recommender systems, user embeddings, feedback loops, serendipity.} \todo{\citep{chaney2018algorithmic,kotkov2016survey,ziegler2005improving}}
-\paragraph{Behavioral cloning and imitation.} \todo{\citep{pomerleau1991efficient,ross2011reduction}}
-\paragraph{Off-policy and counterfactual evaluation.} \todo{\citep{li2011unbiased,swaminathan2015counterfactual}}
-\paragraph{Lifelogging and quantified self.} \todo{\citep{gurrin2014lifelogging}}
+Imitation has a known failure mode that matters more for a personal agent than for a robot. A good clone reproduces its source's policy, including the parts of that policy the person would change if they could see the alternatives. A recommender trained on a person's engagement learns what they already attend to and serves more of it, which is the feedback loop studied in recommender systems as algorithmic confounding and homogenization \citep{chaney2018algorithmic}. The subject of this study noticed that several consequential turns in his own life began with exposures his contemporaneous preferences would likely have ranked low: an unsolicited message, a stranger's invitation, an unfamiliar community. If that is common, an agent that optimizes for ``what Carl would engage with'' would filter out exactly those events.
 
-\section{Dataset and Longitudinal Setting}
-\measured{Inventory summarized from \texttt{data\_inventory.md}: 3.43M normalized events across 37 sources; messaging 2011--2026; wide multimodal capture from 2026-08; dense lanes from 2026-09-04; platform recommendation exports as single 2026 snapshots.}
-\todo{Table of sources, ranges, counts. Coverage figure.}
+Reinforcement learning has a vocabulary for this tension. Exploitation chooses the action with the highest estimated value. Exploration spends some budget on actions whose value is uncertain, because the estimate may be wrong and because trying them reveals information \citep{auer2002finite,russo2018tutorial}. Curiosity, information gain and empowerment formalize why an agent might prefer the unfamiliar \citep{schmidhuber2010formal,houlsby2011bayesian,pathak2017curiosity,klyubin2005empowerment}. The recent argument that agents should learn primarily from their own streams of experience \citep{silver2025era} makes the question concrete for personal agents: if the stream is one human life, what should the agent explore on that person's behalf?
 
-\section{Formalization}
-Observed history $O_{1:t}$; representation $b_t \approx P(S_t \mid O_{1:t}, A_{1:t-1})$;
-clone $\pi_{\mathrm{clone}}(a \mid b_t)$; augmenting policy $\pi_{\mathrm{aug}}(a \mid b_t)$.
-Platform outputs $Y_t = f(z_t^{\mathrm{plat}}, C_t)$ are treated as observations from another estimator with unknown objective.
-Provisional score
-\begin{equation}
-s(x \mid b_t) = w_r\,\mathrm{rel}(x) + w_u\,\mathrm{unc}(x) + w_n\,\mathrm{nov}(x) + w_i\,\mathrm{IG}(x) + w_o\,\mathrm{OV}(x) - w_c\,\mathrm{cost}(x),
-\end{equation}
-with $\mathrm{IG}(a) = H(b_t) - \mathbb{E}[H(b_{t+1}) \mid a]$. \proposed{Each term is operationalized in EXPERIMENT\_PLAN.md E2 and ablated; none is assumed well-defined.}
+This paper asks the narrowest testable version of that question. Given the subject's logged history up to a moment, and the set of people who reached out to him that week, does a ranker built to predict his engagement surface the exposures that later became lasting ties? Can exploration terms of the kind the literature proposes do better at the same budget? We study one person over fifteen years, using only what was logged, with outcomes defined in advance and a test period we opened once.
+
+\paragraph{Contributions.}
+\begin{enumerate}
+\item A leakage-controlled retrospective benchmark for engineered serendipity on one subject: 35{,}168 inbound contact events from 2011 to 2026, of which 3{,}719 are weak-tie exposures, each with a delayed, automatically computed outcome.
+\item A pre-registered test on held-out years (2024 to 2025). A relevance ranker buries later-lasting ties (supported). A hybrid exploration score does not beat random exploration with equal diversity (rejected). New-person-first ranking is inconclusive.
+\item Evidence from typed judgments by two local language models that the exposures which became lasting ties were more often personal chat and less often invitations or organizational outreach. This is the opposite of what an ``opportunity'' or option-value signal rewards.
+\item An independent verification of a prior behavioral-cloning result on the same subject, and an explicit account of what current data cannot support. In particular, the platform-recommendation ``mirror'' channel we propose cannot yet be tested, because platforms export only present-day snapshots.
+\end{enumerate}
+
+\section{Problem setting}
+\label{sec:setting}
 
 \begin{figure}[t]
 \centering
 \includegraphics[width=\linewidth]{fig1_architecture.pdf}
-\caption{The belief / clone / explore loop. External platforms observe the subject and emit recommendations; those outputs enter the local belief as one more observation channel (an ``algorithmic mirror''). Both policies produce exposure candidates; the human chooses; the outcome becomes new experience.}
+\caption{The setting. Observations of a person feed a belief or representation $b_t$. A behavioral clone predicts what the person would do; an exploration policy proposes what to inspect because the model does not know. Both produce exposure candidates, the person chooses, and the outcome becomes new experience. Platforms that have logged the person for years emit recommendations that can be treated as one more observation channel (an ``algorithmic mirror''). This paper tests the two policies on logged exposures; the mirror channel is proposed, not tested (Section~\ref{sec:mirrors}).}
+\label{fig:arch}
 \end{figure}
 
-\section{Experimental Design}
-\proposed{Exposure--action--outcome table (E1), leakage-safe features (E2), chronological splits with embargo $\ge$ horizon, policies and metrics (E3), mandatory negative controls.}
-\paragraph{Do we need RL?} No. Logged exposures, actions, and delayed outcomes under the subject's own policy support retrospective ranking with bandit-style exploration terms; the eventual problem is POMDP-shaped, the present data is not.
+We distinguish four objects (Figure~\ref{fig:arch}). The observed history $O_{1:t}$ is everything logged up to time $t$. A representation $b_t \approx P(S_t \mid O_{1:t}, A_{1:t-1})$ summarizes it; we make no claim that a unique latent ``state of the person'' exists, and $b_t$ can be any learned summary, including a predictive-state representation \citep{littman2002predictive,singh2004predictive}. The behavioral clone $\pi_{\mathrm{clone}}(a \mid b_t)$ predicts the person's action. The augmenting policy $\pi_{\mathrm{aug}}(a \mid b_t)$ decides what to surface. The full problem is a partially observed control problem \citep{kaelbling1998planning}, and with uncertainty about the person's own preferences it is Bayes-adaptive \citep{duff2002optimal,guez2012efficient}. The data do not support that problem. They contain exposures and the person's responses under his own, unknown policy, with no interventions. We therefore study a narrower retrospective ranking problem with contextual-bandit-style scoring terms \citep{li2010contextual}, evaluated offline \citep{li2011unbiased,swaminathan2015counterfactual}.
 
-\section{Falsification statement}
-\measured{Copied from RESEARCH\_QUESTIONS.md and frozen with the annotation protocol.} H-SER is false if the best exploration-aware policy does not improve recall@$k$ of consequential exposures over relevance-only by more than random exploration with an equal diversity budget, for every $k\in\{1,3,5,10\}$, on the held-out test periods.
+\paragraph{Exposures and outcomes.} An exposure $x$ at time $t$ is an inbound message that arrives after at least 24 hours of silence in its thread. A weak-tie exposure is the first message in a thread, or one that arrives after at least 180 days of silence. The observed action is whether the subject replied within seven days. The delayed outcome (Tier A, computed automatically) is that within 365 days the thread saw at least five further bursts of conversation in either direction and was still active in the last 90 days of that year. We call such exposures \emph{later-lasting}. This outcome is available only after the fact and is used only as a label.
 
-\section{Behavioral Clone Results}
-\measured{Recomputed from raw per-case scores (\texttt{scripts/verify\_carl\_model.py}).}
-\begin{table}[h]\centering
-\begin{tabular}{lrrr}\toprule
-Variant & Top-1 & $\Delta$ vs.\ A & 95\% CI (cluster bootstrap)\\\midrule
-A: immediate situation & 0.280 & --- & ---\\
-E: all context layers, base model & 0.256 & $-2.4$ & $[-4.6, +0.2]$\\
-E-shuf: shuffled context & 0.241 & $-4.0$ & $[-6.1, -1.4]$\\
-F: random history & 0.248 & $-3.2$ & $[-5.4, -1.2]$\\
-L: A + personal LoRA & \textbf{0.378} & $+9.8$ & $[+6.8, +13.4]$\\
-L+E: all layers + LoRA & 0.382 & $+10.1$ & $[+7.0, +14.1]$\\
-EM-own / EM-all (event model) & 0.289 / 0.293 & --- & EM-all vs.\ EM-own $+0.4$, n.s.\\\bottomrule
-\end{tabular}
-\caption{5-way next-action prediction, pooled over six action families ($n=1695$, \texttt{said} excluded per the original protocol), chance $=0.20$. The pre-registered primary hypothesis (E $>$ A) failed; the LoRA hypothesis (L $>$ A) held on 20 of 21 test days. Seventeen of the 21 days contain only \texttt{reply} and \texttt{sent} cases; per-family, L loses on \texttt{copied} ($n=30$), \texttt{clicked}, and \texttt{looked}.}
+\paragraph{Scores.} A pure exploitation ranker orders candidates by predicted engagement $\hat{p}(\text{reply} \mid x, b_t)$. The exploration scores we test are
+\begin{equation}
+s(x) = w_r\,\mathrm{rel}(x) + w_u\,\mathrm{unc}(x) + w_n\,\mathrm{nov}(x) + w_i\,\mathrm{IG}(x) + w_o\,\mathrm{OV}(x) - w_c\,\mathrm{cost}(x),
+\label{eq:hybrid}
+\end{equation}
+where $\mathrm{rel}$ is the ensemble mean of $\hat{p}$, $\mathrm{unc}$ its standard deviation across ensemble members, $\mathrm{IG}$ a BALD-style mutual-information proxy for $H(b_t) - \mathbb{E}[H(b_{t+1}) \mid x]$ \citep{houlsby2011bayesian}, $\mathrm{nov}$ is 1 for a first message from a new person and decays with prior contact, $\mathrm{OV}$ is a language-model judgment of how much engaging would open new people, communities or projects, and $\mathrm{cost}$ grows with message length. Each term is a proxy, and whether any of them helps is the question.
+
+\section{Related work}
+
+\paragraph{Belief-state control and Bayes-adaptive exploration.} POMDPs formalize acting under partial observability \citep{kaelbling1998planning}; Bayes-adaptive MDPs make uncertainty about the environment part of the state, so that exploring is optimal when it pays for itself \citep{duff2002optimal,guez2012efficient}. Predictive-state representations replace latent state with predictions of future observations \citep{littman2002predictive,singh2004predictive}, which suits a setting in which no one can name the true state of a person. Continuing, experience-driven learning is the frame of \citet{sutton2018reinforcement} and \citet{silver2025era}.
+
+\paragraph{Exploration and intrinsic motivation.} Optimism under uncertainty \citep{auer2002finite}, posterior sampling \citep{thompson1933likelihood,russo2018tutorial}, information gain \citep{houlsby2011bayesian}, curiosity \citep{schmidhuber2010formal,pathak2017curiosity} and empowerment \citep{klyubin2005empowerment} each justify taking actions of uncertain immediate value. Our hybrid score borrows one proxy from several of these traditions.
+
+\paragraph{Recommendation, serendipity and feedback loops.} Contextual bandits are the standard framing for exploration in recommendation \citep{li2010contextual}, and off-policy estimators make logged data usable for evaluation \citep{li2011unbiased,swaminathan2015counterfactual}. Serendipity and diversity have long been proposed as correctives to accuracy-only ranking \citep{ziegler2005improving,kotkov2016survey}, and recommender feedback loops are known to homogenize what users see \citep{chaney2018algorithmic}. We evaluate these ideas for a single person over a long horizon rather than across many users over short ones.
+
+\paragraph{Weak ties.} That novel information and opportunity tend to arrive through weak ties is an old sociological claim \citep{granovetter1973strength}, recently supported by a large field experiment on a professional network \citep{rajkumar2022causal}. Our outcome is narrower: whether a weak tie became a lasting one, not what it led to.
+
+\paragraph{Imitation and lifelogging.} Behavioral cloning and its compounding-error problem are classical \citep{pomerleau1991efficient,ross2011reduction}. Lifelogging research documents the capture and retrieval of personal data \citep{gurrin2014lifelogging}; we use such an archive to test decision policies rather than for retrieval.
+
+\section{Data}
+\label{sec:data}
+
+\paragraph{Subject and archive.} The subject is the author. He began keeping digital records in secondary school for practical reasons, and later added continuous screen, input, audio, location and wearable capture. Table~\ref{tab:sources} lists the only modality that spans the full fifteen years: messages. Denser streams (screen, input, attention, location, cameras) exist only from July to September 2026 and are not used here except in the behavioral-cloning experiment. Platform exports that describe what recommenders showed the subject (feed logs, suggested people, ad interests, watch and search history) exist only as single snapshots from July to September 2026 (Section~\ref{sec:mirrors}).
+
+\begin{table}[t]
+\centering
+\small
+\input{tables/sources.tex}
+\caption{Message sources, 2011-11 to 2026-09-15. Messages are normalized into one event schema with hashed thread identifiers. A contact event is an inbound message after at least 24 hours of thread silence.}
+\label{tab:sources}
 \end{table}
 
-\section{Algorithmic Mirrors}
-\measured{Recommendation outputs exist only as single 2026 snapshots; no time series.}
-\proposed{Cross-sectional test E5.} \todo{}
+\paragraph{Exposure table.} From 3{,}082{,}593 messages in 7{,}139 threads we extract 35{,}168 inbound contact events. Of these, 2{,}856 open a new thread and 863 revive a thread silent for at least 180 days, giving 3{,}719 weak-tie exposures. Of the 3{,}221 weak-tie exposures whose 365-day outcome window is complete, 430 (13.3\%) became later-lasting. The corresponding rate over all contact events is much higher (63\%), because most contact events come from existing strong ties. We therefore rank weak-tie exposures only.
 
-\section{Retrospective Serendipity Evaluation}
-\measured{Validation split only (2021--2022); test split untouched pending the annotation freeze. Weak-tie inbound exposures, Tier A labels (tie persisted $\wedge \geq 5$ later bursts within 365 d), weekly candidate sets, cluster bootstrap over weeks, stochastic policies averaged over 20 seeds.}
-\begin{table}[h]\centering
-\begin{tabular}{lrrr}\toprule
-Policy & recall@1 & recall@3 & MRR\\\midrule
-Relevance-only (clone proxy) & 0.115 & 0.298 [0.20, 0.40] & 0.296\\
-Hybrid (unc.\ + IG + option value) & 0.106 & 0.368 [0.27, 0.47] & 0.310\\
-Random & 0.135 & 0.413 [0.35, 0.48] & 0.343\\
-Random with diversity budget & 0.117 & 0.455 [0.39, 0.53] & 0.346\\
-Novelty-only (new person first) & 0.148 & 0.471 [0.40, 0.55] & 0.368\\
-\bottomrule\end{tabular}
-\caption{Validation-split ranking of later-consequential weak-tie exposures (63 weeks with a positive, median 8 candidates per week). Relevance-only ranks them below random; the hybrid exploration score does not beat random exploration with an equal diversity budget; plain novelty has a small edge with overlapping intervals. Reply-model AUC 0.678 with AnyJev judgment features.}
+\paragraph{Candidate pools and split.} Rankings are made per ISO week among that week's weak-tie exposures. The primary pool excludes messages that a local judge rates as automated, bulk or marketing ($p > 0.5$, 34.9\% of weak-tie exposures); the secondary pool keeps them. The split is chronological with a 366-day embargo at each boundary, longer than the outcome horizon, so no training label can depend on an evaluation-period event (Table~\ref{tab:pools}).
+
+\begin{table}[t]
+\centering
+\small
+\input{tables/pools.tex}
+\caption{Weak-tie exposures with complete 365-day outcomes, per split and pool. Train and validation were used for all development; test was opened once after pre-registration.}
+\label{tab:pools}
 \end{table}
-\measured{Judgments from two local models agree that the exposures which became lasting ties were personal first messages from new people rather than invitations or organizational outreach (inter-judge $\kappa$ 0.62--0.68 on those questions).}
-\todo{Test-split run after the annotation freeze; Tier B labels; Figure 2 from real output.}
 
-\section{Ablations and Negative Controls}
-\proposed{E3 controls.} \todo{}
+\paragraph{Privacy.} All processing ran on the subject's own machines: two Apple Silicon computers and a desktop with two consumer GPUs. No message text, contact identity or raw export was sent to an external service. Only aggregate statistics leave the machine, in this paper and in the code repository.
 
-\section{Limitations and Ethics}
-N=1; researcher--subject dual role; retrospective label bias; cherry-picking risk; privacy; non-independence; recommendation-system confounding; no causal inference from observational trajectories. \todo{Expand from ETHICS\_AND\_PRIVACY.md.}
+\section{Methods}
+\label{sec:methods}
+
+\paragraph{Leakage control.} Every feature for an exposure at time $t$ is computed from events timestamped at or before $t$. Outcome columns are declared in the schema as label-only, and the feature builder refuses any frame that contains one. Tests inject each label column into feature frames and check that they are rejected, and check that the split is monotone and embargoed.
+
+\paragraph{Features.} Three tiers. (i) Metadata: whether the thread is new or dormant, group size, prior message counts in each direction, prior reply rate in the thread, recency, thread age, the subject's global activity over the previous 30 days, the platform's share of prior contact events, message length, hour and weekday. (ii) Content: a local multilingual sentence encoder \citep{reimers2019sentence,reimers2020making} embeds each inbound message and 396{,}381 of the subject's own messages; we use 32 principal components fit on training data and the maximum and mean cosine similarity to the subject's own messages in the preceding 90 days. (iii) Typed judgments: six questions per message (invites to an event or opportunity; expects a reply; written on behalf of an organization; automated or marketing; an option-value score on four described levels; a six-way message type), answered by a local model and read from the next-token distribution restricted to the answer labels. We use AnyJev at level L0 \citep{anyjev2026}, which averages option-order bias over label rotations and divides out the label prior, with Gemma 4 31B (AWQ, served locally with vLLM \citep{kwon2023efficient}) as the primary judge. Qwen3-8B \citep{yang2025qwen3} on Apple Silicon is a second, independent judge for the weak-tie exposures.
+
+\paragraph{Engagement model.} A five-member bootstrap ensemble of logistic regressions predicts reply-within-seven-days from all three feature tiers. It is fit on training-period exposures only. Its mean is $\mathrm{rel}(x)$ and its spread is $\mathrm{unc}(x)$.
+
+\paragraph{Policies.} Relevance-only (the ensemble mean, our stand-in for a clone-driven recommender); UCB (relevance plus uncertainty); Thompson sampling from a Gaussian with the ensemble mean and spread; $\varepsilon$-greedy with $\varepsilon = 0.2$; the hybrid score of Eq.~\ref{eq:hybrid}, with weights chosen by grid search on the preceding split; new-person-first (novelty); platform popularity; random; and random with a diversity budget, a control that fills the top of the list with one exposure per platform in random order before ranking the rest randomly. Stochastic policies, and policies with many ties, are averaged over 20 seeds per week.
+
+\paragraph{Metrics and statistics.} For each week containing at least one later-lasting exposure we compute mean reciprocal rank (MRR) and recall at $k$ of the later-lasting exposures. Comparisons are paired per week and summarized by the mean difference with a 95\% cluster-bootstrap interval over weeks (5{,}000 resamples).
+
+\paragraph{Pre-registration.} Every choice above, including the automated-message filter, was made using train and validation data. We then froze the protocol and analysis plan in a tagged commit and ran the test split once with the recorded commands. Three hypotheses carry decision rules (Table~\ref{tab:prereg}). \textbf{H-PREM}: relevance-only ranks later-lasting weak ties below random. \textbf{H-SER}: the hybrid exploration score beats random exploration with an equal diversity budget. \textbf{H-NOV}: new-person-first beats the same baseline. The primary endpoint for each is the paired MRR difference on the primary pool. H-SER is rejected unless its interval lies entirely above zero.
+
+\section{Results}
+\label{sec:results}
+
+\subsection{The subject's behavior can be cloned}
+
+A separately pre-registered and previously unpublished experiment on the same subject, evaluated on August and September 2026, asked a frozen Qwen3-8B to choose the subject's actual next action among five candidates drawn from his own history (chance 20\%). Seven action families were covered: replying, sending, typing, speaking, copying, clicking and looking. We re-computed its results from the raw per-case scores (Table~\ref{tab:clone}). Given only the immediate situation, the base model reaches 28.0\% top-1. A LoRA adapter \citep{hu2022lora} trained on the subject's own text reaches 37.8\%, a gain of 9.8 points with an interval of $[6.8, 13.4]$, and improves on 20 of 21 test days. Adding every available context layer to the base model did not help (25.6\%), and shuffled or random-history controls sit at 24 to 25\%. Two caveats: 17 of the 21 test days contain only reply and send decisions, and the adapter loses on the copy, click and look families. The clone captures the subject's writing policy better than his screen behavior.
+
+\begin{table}[t]
+\centering
+\small
+\input{tables/clone.tex}
+\caption{Five-way next-action prediction, pooled over six action families ($n = 1{,}695$), recomputed from raw per-case scores. Intervals are cluster bootstraps. The pre-registered hypothesis that context layers help (E $>$ A) failed; the hypothesis that the personal adapter helps (L $>$ A) held.}
+\label{tab:clone}
+\end{table}
+
+\subsection{A relevance ranker buries later-lasting ties, and exploration bonuses do not recover them}
+
+Table~\ref{tab:prereg} gives the three pre-registered decisions and Table~\ref{tab:policies} the policy-level results. The engagement model is informative about replies (test AUC 0.671 on the primary pool). As a ranker for later-lasting ties, however, it is worse than random order on the held-out years: MRR 0.327 against 0.465, a paired difference of $-0.138$ $[-0.200, -0.067]$. H-PREM is supported, and the direction matches validation.
+
+The hybrid exploration score, with weights tuned on validation (relevance 1, novelty 0.5, option value 1, cost 0.25; uncertainty and information gain received weight 0), scored MRR 0.279. It fell below random exploration with a diversity budget (0.496) by $-0.217$ $[-0.267, -0.164]$. H-SER is rejected. UCB and Thompson sampling, which add epistemic uncertainty to the relevance model, track relevance-only closely (0.305 and 0.328). With the clone-like relevance signal as their base, they inherit its ranking.
+
+New-person-first was the best non-random policy on validation (MRR 0.440 against 0.418 for random with diversity). It did not replicate on test ($-0.035$ $[-0.085, 0.013]$). H-NOV is inconclusive. The secondary pool, which keeps automated messages, gives the same three conclusions: relevance minus random $-0.126$ $[-0.174, -0.065]$, hybrid minus random with diversity $-0.157$ $[-0.193, -0.116]$, and novelty minus random with diversity $-0.027$ $[-0.067, 0.014]$ (Appendix Table~\ref{tab:policies2}). Figure~\ref{fig:forest} shows validation and test side by side, and Figure~\ref{fig:timeline} shows every later-lasting test exposure.
+
+\begin{table}[t]
+\centering
+\small
+\input{tables/prereg.tex}
+\caption{Pre-registered hypotheses, primary pool. Entries are paired per-week MRR differences with 95\% cluster-bootstrap intervals over weeks (validation 56 weeks, test 30 weeks). The permuted column shuffles outcome labels within each test week; every interval then includes zero, as it should.}
+\label{tab:prereg}
+\end{table}
+
+\begin{table}[t]
+\centering
+\small
+\input{tables/policies_primary.tex}
+\caption{Ranking later-lasting weak-tie exposures, primary pool. Test: 30 weeks, 393 exposures, 36 later-lasting, median 4 candidates per week. Validation: 56 weeks, 672 exposures, 113 later-lasting. $^\dagger$Not pre-registered; see Section~\ref{sec:exploratory}.}
+\label{tab:policies}
+\end{table}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{fig4_preregistered.pdf}
+\caption{Pre-registered comparisons on validation (gray) and on the held-out test years (blue), for both candidate pools. Negative values mean the first policy ranks later-lasting ties worse.}
+\label{fig:forest}
+\end{figure}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{fig2_counterfactual.pdf}
+\caption{Held-out test period. Top: weak-tie inbound exposures stacked by week; rings mark those that became lasting ties. Bottom: the weekly rank of each later-lasting exposure under relevance-only (gray), new-person-first (blue, averaged over tie-breaks) and the hybrid exploration score (hollow). The shaded band is a budget of one exposure per week.}
+\label{fig:timeline}
+\end{figure}
+
+\subsection{What the later-lasting exposures looked like}
+
+Table~\ref{tab:judgments} compares typed judgments of later-lasting and ordinary weak-tie exposures under both judges. The two judges agree. Later-lasting exposures were less often invitations to an event, job, project or community (Gemma 0.26 to 0.12; Qwen 0.17 to 0.06). They were less often written on behalf of an organization (0.36 to 0.15; 0.23 to 0.05) and more often personal or social chat (0.36 to 0.56, AUC 0.63; 0.43 to 0.56, AUC 0.60). The judged option value, the term meant to capture ``this could open doors'', has no discriminative value (AUC 0.49 and 0.44). Agreement between the judges on the binarized judgments is substantial for invitation ($\kappa = 0.70$), organization (0.67) and marketing (0.67), moderate for message type ``social'' (0.60), and weak for ``automated'' (0.37) and ``expects a reply'' (0.38). The two models disagree most about what counts as automated: Gemma flags 35\% of weak-tie exposures, Qwen about 10\%. On validation, re-running the primary analysis with Qwen's automated filter left the ordering of policies unchanged.
+
+This pattern explains why the hybrid score failed. On validation its tuner put full weight on option value, which rewards invitations and organizational outreach. In this subject's record, those are the weak-tie messages least likely to become lasting ties.
+
+\begin{table}[t]
+\centering
+\small
+\input{tables/judgments.tex}
+\caption{Mean judged probability (or score) for ordinary and later-lasting weak-tie exposures with complete outcomes ($n = 3{,}221$, 430 later-lasting), and the AUC of each judgment for the outcome. Both judges ran locally at AnyJev level L0 with zero labels.}
+\label{tab:judgments}
+\end{table}
+
+\subsection{Controls and ablations}
+
+\paragraph{Label permutation.} Shuffling outcome labels within each test week removes every effect: all three pre-registered intervals include zero (Table~\ref{tab:prereg}). Across the 24 permuted comparisons we computed (six policy pairs, four metrics), one interval touches zero at its edge, consistent with chance.
+
+\paragraph{What the engagement model learns.} Reply-prediction AUC on the primary pool rises from 0.606/0.618 (validation/test) with metadata, to 0.644/0.626 with content embeddings, to 0.670/0.668 with typed judgments, and 0.666/0.671 with all three. Better reply prediction does not yield a better ranker of later-lasting ties. The better the model predicts what the subject answers, the more faithfully it reproduces a policy under which later-lasting ties rank low.
+
+\paragraph{Leakage.} The leakage and split tests passed at the tagged commit and on every run.
+
+\subsection{Exploratory observations}
+\label{sec:exploratory}
+
+These analyses were not pre-registered and should be read as hypotheses.
+
+\paragraph{Platform.} Ranking by the platform's share of the subject's recent contact events was the best single policy on test (MRR 0.552). Its paired difference from random with diversity was $+0.056$ $[-0.040, 0.155]$ on the primary pool and $+0.091$ $[-0.001, 0.186]$ on the secondary pool. Where a person currently lives socially appears to predict which new contacts will stick better than anything about the message. It is also a confound: the subject moved between platforms over the years, and a platform's share encodes both habit and era.
+
+\paragraph{Exploration over fifteen years.} Figure~\ref{fig:proxies} shows monthly proxies computed from message metadata only. The subject's reply rate to first messages from new threads has stayed near 0.5 since 2017. Self-initiated new threads grew rather than shrank, from about 100 in 2016 to between roughly 290 and 580 a year from 2017 to 2025. The motivating intuition was that the subject explored more as a teenager than as an adult. These proxies do not support it, but they are confounded by platform coverage (the bottom panel of the figure), and counts before 2016 are too small to read.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{fig3_exploration_proxies.pdf}
+\caption{Exploratory exploration-rate proxies from message metadata, 2011 to 2026 (three-month rolling means). Reply rate is masked where fewer than 15 new inbound threads fall in a window. The bottom panel shows outbound volume by platform, to make platform migration visible.}
+\label{fig:proxies}
+\end{figure}
+
+\section{Algorithmic mirrors: proposed, not tested}
+\label{sec:mirrors}
+
+Large platforms maintain learned representations of each user and expose only their outputs. A feed, a list of suggested people or a set of inferred ad interests is a noisy observation of the platform's estimate of the user: $Y_t = f(z^{\mathrm{plat}}_t, C_t)$ with $z^{\mathrm{plat}}_t$ hidden. For a personal agent these outputs are an unusual observation channel. They are another model's estimate of the same person, trained on behavior the agent may not see, with an objective the agent does not know. Comparing that estimate with the agent's own, and asking whether disagreement predicts later change, is a natural experiment. We could not run it. Every platform export available to the subject (Facebook feed-exposure logs and suggested friends, ad-interest inferences, YouTube and Google activity, Twitter personalization) is a single snapshot taken in July to September 2026, and recommendation surfaces such as home feeds are not exported at all. Testing the mirror idea requires prospective collection of platform outputs over time, which we have begun planning but not run.
+
+\section{Limitations and ethics}
+
+\paragraph{One subject, who is also the researcher.} Every number here describes one person's record. The contribution is a method, a benchmark design and one well-controlled case, not a population estimate. The dual role invites motivated analysis. The pre-registration, the single opening of the test split and the automatic outcome definition are the safeguards, and the hypothesis most closely tied to the motivating story (H-SER) was rejected.
+
+\paragraph{The outcome is narrow.} ``Later-lasting'' means a thread stayed active and grew. It does not capture a single message that led to a job, a collaborator or an idea without further conversation, and it misses ties that moved to another platform, because thread identifiers are per platform. Manual labels of a blind 300-exposure sample, collected after this freeze and analyzed separately, will test whether the conclusions hold for outcomes the subject judges consequential.
+
+\paragraph{Observational and retrospective.} We rank exposures that occurred. We cannot say what would have happened if an agent had surfaced different ones, and nothing here licenses causal claims about any exposure. Platforms also chose which messages reached the subject at all.
+
+\paragraph{Small test set.} The primary test pool has 30 weeks with at least one later-lasting exposure and a median of four candidates per week. Intervals are correspondingly wide, which is why H-NOV is inconclusive.
+
+\paragraph{Third parties.} Other people's messages were processed, by local models only, to compute features and judgments. No message content, identity or per-person result is reported. The analysis could not obtain consent from correspondents, and we limit its outputs to aggregates for that reason.
+
+\paragraph{Motivation is not diagnosis.} The subject's record keeping began as a practical aid to memory and attention. Nothing in this paper is a clinical claim.
 
 \section{Discussion}
-\todo{}
+
+Three results bear on how personal agents should be built. First, in this record the signal that best predicts what the subject will answer is a poor guide to which new people will matter. The relevance ranker did worse than uninformative on later-lasting ties: it ranked them below random. That is the worry behind engineered serendipity, and here it shows up on held-out years instead of in an anecdote.
+
+Second, the obvious fix, adding curiosity-style bonuses to the relevance model, did not work. UCB and Thompson sampling inherit the relevance model's ordering. The hybrid score learned on validation to reward judged opportunity, and judged opportunity turned out to be anti-correlated with the outcome. A policy that simply guarantees coverage across contexts, with no model of the person at all, beat every hand-built exploration term. Anyone building a personal agent should measure exploration terms against random-with-coverage before trusting them. A term that encodes the designer's theory of what a good opportunity looks like deserves particular suspicion; ours did.
+
+Third, cloning and augmenting really are different problems. The same subject's next action is predictable enough that a small adapter adds ten points of accuracy. The exposures that later mattered are the ones his predictable policy ranks low. A personal agent that inherits that policy inherits its blind spots.
+
+The eventual problem is belief-state control with the person in the loop, and the natural next step is prospective: a small daily exposure budget, randomized between policies, with outcomes measured over months. The retrospective benchmark here fixes what such a study should beat.
 
 \section{Conclusion}
-\todo{}
+
+On fifteen years of one person's inbound messages, a ranker trained to predict his engagement buried the weak-tie exposures that became lasting ties, and hand-built exploration bonuses did not recover them. Random exploration with coverage did. Prediction asks what a person will do; augmentation asks what they are failing to consider. The two require different objectives, and on this evidence the second is harder to engineer than the literature's exploration terms suggest.
+
+\paragraph{Code and data availability.} Code, tests, the frozen protocol and pre-registration (git tag \texttt{annotation-v1}) and all aggregate results are at \url{https://github.com/CarlKho-Minerva/arxiv-Engineering-Serendpity}. The underlying messages and exports are private and are not released.
+
+\paragraph{Use of AI assistance.} The analysis code, figures and a draft of this manuscript were produced with the help of an AI coding assistant (Claude, Anthropic), working under the author's direction on the author's machines. All personal-data processing used local models only. The author reviewed the analysis and takes responsibility for the content.
 
 \bibliographystyle{plainnat}
 \bibliography{refs}
+
+\appendix
+\section{Secondary pool}
+
+\begin{table}[h]
+\centering
+\small
+\input{tables/policies_secondary.tex}
+\caption{As Table~\ref{tab:policies}, secondary pool (automated messages kept). Test: 39 weeks, 738 exposures, 52 later-lasting, median 8 candidates per week. Validation: 63 weeks, 905 exposures, 134 later-lasting.}
+\label{tab:policies2}
+\end{table}
+
 \end{document}
