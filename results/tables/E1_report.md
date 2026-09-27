@@ -190,4 +190,4 @@ Secondary pool (all weak ties): relevance−random -0.126 [-0.174, -0.065], hybr
 
 Exploratory (post-freeze, not pre-registered): platform popularity was the best test policy (MRR 0.552); popularity − random_diversity +0.056 [−0.040, +0.155] primary, +0.091 [−0.001, +0.186] secondary. Novelty's validation edge did not replicate.
 
-Bottom line: relevance buries later-lasting weak ties (replicated on held-out years); hand-built exploration bonuses do worse than random-with-diversity; new-person-first is not reliably better than random. Manuscript: `paper/main.pdf`.
+Bottom line: relevance buries later-lasting weak ties (replicated on held-out years); hand-built exploration bonuses do worse than random-with-diversity; new-thread-first is not reliably better than random. Manuscript: `paper/main.pdf`.

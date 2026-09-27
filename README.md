@@ -7,7 +7,7 @@ an agent that surfaces what the subject is failing to consider (an exploration
 policy), and whether that difference is measurable retrospectively on fifteen
 years of logged exposures and choices.
 
-**Status (2026-09-27):** protocol frozen (tag `annotation-v1`) and the held-out 2024–2025 test split opened once. Pre-registered verdicts: a relevance ranker buries later-lasting weak ties (**supported**); a hybrid uncertainty/information-gain/option-value score beats random exploration with equal diversity (**rejected**); new-person-first beats it (**inconclusive**). Manuscript in `paper/`.
+**Status (2026-09-27):** protocol frozen (tag `annotation-v1`) and the held-out 2024–2025 test split opened once. Pre-registered verdicts: a relevance ranker buries later-lasting weak ties (**supported**); a hybrid uncertainty/information-gain/option-value score beats random exploration with equal diversity (**rejected**); new-thread-first beats it (**inconclusive**). Manuscript in `paper/`.
 
 ## What is measured vs. proposed
 

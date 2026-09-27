@@ -33,7 +33,7 @@ def main() -> None:
         df = pd.read_parquet(real)
         for p in draw_cf(df, FIG, synthetic=False, k=1, log_ranks=False,
                          exploit_label="relevance-only rank (clone proxy)",
-                         explore_label="new-person-first rank (mean over 20 tie-breaks)",
+                         explore_label="new-thread-first rank (mean over 20 tie-breaks)",
                          hybrid_label="hybrid exploration-score rank",
                          stream_label="held-out test period: weak-tie inbound exposures stacked by week  (gray = ordinary · ring = became a lasting tie within 365 d)",
                          stack_stream=True, rank_unit="week"):

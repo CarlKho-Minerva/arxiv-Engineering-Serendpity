@@ -13,7 +13,7 @@ VAL, TEST = "#888888", "#0070f3"
 
 ROWS = [("relevance-random", "H-PREM: relevance-only − random"),
         ("hybrid-random_diversity", "H-SER: hybrid exploration score − random with diversity"),
-        ("novelty-random_diversity", "H-NOV: new-person-first − random with diversity")]
+        ("novelty-random_diversity", "H-NOV: new-thread-first − random with diversity")]
 
 
 def draw(results: Path, out_dir: Path, stem: str = "fig4_preregistered") -> list[Path]:

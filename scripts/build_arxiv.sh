@@ -16,7 +16,7 @@ pdflatex -interaction=nonstopmode -halt-on-error main.tex >/dev/null
 pdflatex -interaction=nonstopmode -halt-on-error main.tex >/dev/null
 if grep -E "Citation .* undefined|Reference .* undefined|There were undefined" main.log; then echo "FAIL: undefined refs"; exit 1; fi
 grep -iE "^Warning--" bibtex.out || true
-grep -c "Overfull \\\\hbox" main.log | xargs -I{} echo "overfull hboxes: {}"
+echo "overfull hboxes: $(grep -c "Overfull" main.log || true)"
 PAGES=$(pdfinfo main.pdf 2>/dev/null | awk '/Pages/{print $2}' || true); echo "pages: ${PAGES:-?}"
 tar -czf "$ROOT/dist/arxiv_bundle.tar.gz" main.tex main.bbl tables figures
 cp main.pdf "$ROOT/dist/main.pdf"; cp main.pdf "$ROOT/paper/main.pdf"

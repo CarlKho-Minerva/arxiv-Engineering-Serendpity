@@ -31,7 +31,8 @@ sys.path.insert(0, str(ROOT))
 from src.features.judgments_local import MAX_CHARS, SOURCES, STATE, situation  # noqa: E402
 
 DER = ROOT / "data" / "derived"
-URL, SERVED, TOKENIZER = "http://<tailnet-host>:8000", "gemma-4-31b-it", "QuantTrio/gemma-4-31B-it-AWQ"
+import os
+URL, SERVED, TOKENIZER = os.environ.get("JUDGE_VLLM_URL", "http://localhost:8000"), "gemma-4-31b-it", "QuantTrio/gemma-4-31B-it-AWQ"
 
 QUESTIONS = [
     Question.noul("Does the message invite the recipient to an event, opportunity, project, job, collaboration, "

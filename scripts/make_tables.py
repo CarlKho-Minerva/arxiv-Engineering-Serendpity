@@ -11,26 +11,23 @@ T = ROOT / "paper" / "tables"; T.mkdir(parents=True, exist_ok=True)
 
 
 def fmt(x, nd=3):
-    return f"{x:.{nd}f}".replace("-", "$-$")
+    t = f"{x:.{nd}f}"
+    if t.startswith("-") and float(t) == 0:
+        t = t[1:]
+    return t.replace("-", "$-$")
 
 
 def ci(c, nd=3):
     return f"[{fmt(c[0], nd)}, {fmt(c[1], nd)}]"
 
 
-# ---- Table: sources
-ex = N["exposures"]
-msgs = {"msg_messenger": ("Facebook Messenger", 2610864, "2011"), "msg_telegram": ("Telegram", 363225, "2016"),
-        "msg_instagram": ("Instagram DMs", 72345, "2017"), "msg_discord": ("Discord", 21622, "2020"),
-        "msg_gmail": ("Gmail (3 accounts)", 6482, "2013"), "msg_linkedin": ("LinkedIn", 3104, "2020"),
-        "msg_twitter": ("Twitter DMs", 2223, "2016"), "msg_gvoice": ("Google Voice", 2072, "2024"),
-        "msg_gchat": ("Google Chat", 656, "2016")}
-rows = []
-for k, (name, n, y0) in msgs.items():
-    rows.append(f"{name} & {y0} & {n:,} & {ex['by_source'][k]:,}\\\\")
-tot = sum(v[1] for v in msgs.values())
+# ---- Table: sources (counts from paper_numbers.json)
+ex = N["exposures"]; SRC = N["sources"]
+names = {"msg_messenger": "Facebook Messenger", "msg_telegram": "Telegram", "msg_instagram": "Instagram DMs", "msg_discord": "Discord",
+         "msg_gmail": "Gmail (3 accounts)", "msg_linkedin": "LinkedIn", "msg_twitter": "Twitter DMs", "msg_gvoice": "Google Voice", "msg_gchat": "Google Chat"}
+rows = [f"{nm} & {SRC['first_year'][k]} & {SRC['messages'][k]:,} & {ex['by_source'][k]:,}\\\\" for k, nm in names.items()]
 (T / "sources.tex").write_text("\\begin{tabular}{lrrr}\\toprule\nSource & First year & Messages & Contact events\\\\\\midrule\n"
-    + "\n".join(rows) + f"\n\\midrule\nTotal & & {tot:,} & {ex['n_exposures']:,}\\\\\\bottomrule\n\\end{{tabular}}\n")
+    + "\n".join(rows) + f"\n\\midrule\nTotal & & {SRC['total']:,} & {ex['n_exposures']:,}\\\\\\bottomrule\n\\end{{tabular}}\n")
 
 # ---- Table: clone
 c = N["clone"]; v = c["variants"]; vs = c["vs_A"]
@@ -54,7 +51,7 @@ for s, name in (("train", "Train (2011--2019)"), ("val", "Validation (2021--2022
 # ---- Table: policies val/test, primary pool
 names = [("relevance", "Relevance-only (reply model)"), ("ucb", "UCB (relevance + uncertainty)"), ("thompson", "Thompson sampling"),
          ("hybrid", "Hybrid exploration score"), ("epsilon_greedy", "$\\varepsilon$-greedy ($\\varepsilon=0.2$)"),
-         ("random", "Random"), ("random_diversity", "Random with diversity budget"), ("novelty", "New-person-first (novelty)"),
+         ("random", "Random"), ("random_diversity", "Random with diversity budget"), ("novelty", "New-thread-first (novelty)"),
          ("popularity", "Platform popularity$^\\dagger$")]
 def policy_table(fv, ft, fname):
     V, Te = N[fv]["policies"], N[ft]["policies"]
@@ -75,17 +72,44 @@ def verdict(key):
     if key == "relevance-random": return "supported" if hi < 0 else ("rejected" if lo > 0 else "inconclusive")
     if key == "hybrid-random_diversity": return "supported" if lo > 0 else "rejected"
     return "supported" if lo > 0 else ("rejected" if hi < 0 else "inconclusive")
-rows = [f"{h} & {desc} & {crit} & {pr('metrics_val_primary', k)} & {pr('metrics_test_primary', k)} & {pr('metrics_test_primary_permuted', k)} & \\textbf{{{verdict(k)}}}\\\\" for h, desc, k, crit in hyp]
-(T / "prereg.tex").write_text("\\resizebox{\\linewidth}{!}{\\begin{tabular}{lllllll}\\toprule\nHypothesis & MRR difference & Supported if & Validation & Test & Test, labels permuted & Test verdict\\\\\\midrule\n"
-    + "\n".join(rows) + "\n\\bottomrule\n\\end{tabular}}\n")
+rows = [f"{h} & {pr('metrics_val_primary', k)} & {pr('metrics_test_primary', k)} & {pr('metrics_test_primary_permuted', k)} & \\textbf{{{verdict(k)}}}\\\\" for h, desc, k, crit in hyp]
+(T / "prereg.tex").write_text("\\begin{tabular}{lllll}\\toprule\nHypothesis & Validation & Test & Test, labels permuted & Verdict\\\\\\midrule\n"
+    + "\n".join(rows) + "\n\\bottomrule\n\\end{tabular}\n")
 
-# ---- Table: judgments vs label
-jl = N["judgments_vs_label"]
+# ---- Table: judgments vs label, by period
 jn = [("p_invites_action", "Invites to an event, job, project or community"), ("p_org_or_group", "Written on behalf of an organization or group"),
       ("p_automated", "Automated, bulk or marketing"), ("ev_option_value", "Option-value score (0--3)"),
       ("p_exposure_type_social", "Type: personal or social chat")]
-rows = [f"{n} & {fmt(jl['gemma'][k]['ordinary'],2)} & {fmt(jl['gemma'][k]['consequential'],2)} & {fmt(jl['gemma'][k]['auc'],2)} & {fmt(jl['qwen'][k]['ordinary'],2)} & {fmt(jl['qwen'][k]['consequential'],2)} & {fmt(jl['qwen'][k]['auc'],2)}\\\\" for k, n in jn]
-(T / "judgments.tex").write_text("\\resizebox{\\linewidth}{!}{\\begin{tabular}{lrrrrrr}\\toprule\n & \\multicolumn{3}{c}{Gemma 4 31B} & \\multicolumn{3}{c}{Qwen3-8B}\\\\\n"
-    "\\cmidrule(lr){2-4}\\cmidrule(lr){5-7}\nJudgment & Ordinary & Became lasting & AUC & Ordinary & Became lasting & AUC\\\\\\midrule\n" + "\n".join(rows) + "\n\\bottomrule\n\\end{tabular}}\n")
+def jtable(per, fname):
+    J = N["judgments_by_period"][per]
+    rows = [f"{n} & {fmt(J['gemma'][k]['ordinary'],2)} & {fmt(J['gemma'][k]['consequential'],2)} & {fmt(J['gemma'][k]['auc'],2)} & {fmt(J['qwen'][k]['ordinary'],2)} & {fmt(J['qwen'][k]['consequential'],2)} & {fmt(J['qwen'][k]['auc'],2)}\\\\" for k, n in jn]
+    (T / fname).write_text("\\resizebox{\\linewidth}{!}{\\begin{tabular}{lrrrrrr}\\toprule\n & \\multicolumn{3}{c}{Gemma 4 31B} & \\multicolumn{3}{c}{Qwen3-8B}\\\\\n"
+        "\\cmidrule(lr){2-4}\\cmidrule(lr){5-7}\nJudgment & Ordinary & Became lasting & AUC & Ordinary & Became lasting & AUC\\\\\\midrule\n" + "\n".join(rows) + "\n\\bottomrule\n\\end{tabular}}\n")
+jtable("dev", "judgments_dev.tex"); jtable("test", "judgments_test.tex")
+
+# ---- Table: secondary endpoints (paired recall differences, test)
+pairs = [("H-PREM", "relevance-random"), ("H-SER", "hybrid-random_diversity"), ("H-NOV", "novelty-random_diversity")]
+rows = []
+for pool, f in (("Primary", "metrics_test_primary"), ("Secondary", "metrics_test_secondary_fullpool")):
+    for h, k in pairs:
+        P = N[f]["paired"][k]
+        rows.append(f"{pool} & {h} & " + " & ".join(f"{fmt(P[m]['diff'])} {ci(P[m]['ci'],2)}" for m in ("recall@1", "recall@3", "recall@5")) + "\\\\")
+(T / "secondary_endpoints.tex").write_text("\\begin{tabular}{llrrr}\\toprule\nPool & Hypothesis & recall@1 & recall@3 & recall@5\\\\\\midrule\n" + "\n".join(rows) + "\n\\bottomrule\n\\end{tabular}\n")
+
+# ---- Macros for counts used in prose and captions
+SW = N["scored_weeks"]; PP = N["pool_primary"]; PS = N["pool_secondary"]
+def mac(name, val): return f"\\newcommand{{\\{name}}}{{{val}}}"
+M = []
+for pool, tag in (("primary", "P"), ("secondary", "S")):
+    for sp, st in (("train", "Tr"), ("val", "Va"), ("test", "Te")):
+        w = SW[pool][sp]; pl = (PP if pool == "primary" else PS)[sp]
+        M += [mac(f"n{tag}{st}Exp", f"{pl['candidates']:,}"), mac(f"n{tag}{st}Pos", f"{pl['positives']:,}"),
+              mac(f"n{tag}{st}Weeks", w["weeks_total"]), mac(f"n{tag}{st}Scored", w["weeks_scored"]),
+              mac(f"n{tag}{st}ScoredExp", f"{w['exposures_scored']:,}"), mac(f"n{tag}{st}Median", f"{w['median_set_scored']:g}"),
+              mac(f"n{tag}{st}Rate", f"{100*w['positive_rate']:.0f}")]
+M += [mac("qwenAutoPct", f"{100*N['qwen_automated_share_weak']:.0f}"), mac("gemmaAutoPct", f"{100*N['automated_share_weak']:.1f}"),
+      mac("aucPrimaryTest", f"{N['auc']['primary']['all'][1]:.3f}"), mac("aucSecondaryTest", f"{N['auc']['secondary']['all'][1]:.3f}")]
+(T / "numbers.tex").write_text("\n".join(M) + "\n")
+
 print("tables:", sorted(p.name for p in T.glob("*.tex")))
 print({h: verdict(k) for h, _, k, _ in hyp})

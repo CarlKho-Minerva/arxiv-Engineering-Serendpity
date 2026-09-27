@@ -164,7 +164,7 @@ code on disk has small uncommitted diffs relative to the run.
 | Chrome / Safari | `…/Google/Chrome/Default/History`; `~/Library/Safari/History.db` | 07-23 → 09-25 / 06-01 → 09-16 | 204 / 1,497 | |
 | Old-Mac snapshot (Dia, Chrome, Tor places.sqlite) | `E:\Mac_Transfer\cvk_2026-06-27\…` | ≤ 2026-06 | — | not inspected |
 | Takeout Chrome History.json | in Takeout | short | 293 KB | |
-| Calendar | Takeout `Calendar\<account-A-email>.ics` (58 KB); Minerva 5 files; `~/Downloads/carl/md-calendar` (markdown) | — | — | |
+| Calendar | Takeout `Calendar\<account>.ics` (58 KB); Minerva 5 files; `~/Downloads/carl/md-calendar` (markdown) | — | — | |
 | Contacts | Takeout `Contacts\*.vcf`; FB `your_imported_contacts.json` (971 KB) | — | — | |
 | Application tracker | `~/Downloads/carl/md-cv/applications/_tracker/tracker.json` + `tracker_log.jsonl` | 2025-10-26 → 2026-09-25 | 330 records; 10 submitted, 10 won, 9 lost, 134 dormant; 3,260 change events | opportunity-response ground truth for 2025–26 |
 | Capstone progress list | `~/CODELocalProjects/md-capstonefall25_25TPE/master-progress-list/` | 2025-09 → 2026-04 | 42 + 71 entries | progress log, not tracker |

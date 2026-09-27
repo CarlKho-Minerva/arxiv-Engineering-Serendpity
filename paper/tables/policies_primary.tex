@@ -3,13 +3,13 @@
 \cmidrule(lr){2-3}\cmidrule(lr){4-5}
 Policy & MRR & recall@1 & MRR [95\% CI] & recall@1\\\midrule
 Relevance-only (reply model) & 0.347 & 0.152 & 0.327 [0.24, 0.42] & 0.100\\
-UCB (relevance + uncertainty) & 0.333 & 0.134 & 0.305 [0.23, 0.39] & 0.067\\
+UCB (relevance + uncertainty) & 0.333 & 0.134 & 0.305 [0.23, 0.38] & 0.067\\
 Thompson sampling & 0.352 & 0.152 & 0.328 [0.24, 0.42] & 0.115\\
 Hybrid exploration score & 0.374 & 0.167 & 0.279 [0.23, 0.33] & 0.017\\
 $\varepsilon$-greedy ($\varepsilon=0.2$) & 0.389 & 0.189 & 0.399 [0.33, 0.47] & 0.193\\
 Random & 0.408 & 0.187 & 0.465 [0.41, 0.52] & 0.215\\
 Random with diversity budget & 0.418 & 0.190 & 0.496 [0.44, 0.56] & 0.257\\
-New-person-first (novelty) & 0.440 & 0.219 & 0.462 [0.39, 0.53] & 0.223\\
+New-thread-first (novelty) & 0.440 & 0.219 & 0.462 [0.39, 0.53] & 0.223\\
 Platform popularity$^\dagger$ & 0.413 & 0.209 & 0.552 [0.43, 0.67] & 0.350\\
 \bottomrule
 \end{tabular}
