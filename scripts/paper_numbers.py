@@ -105,7 +105,7 @@ for line in open(os.path.expanduser("~/.local/state/lifeos/carl-model/runs/m2/pr
     fam[r["family"]] += 1
     if r["family"] != "said": pc[r["day"]].add(r["family"])
 out["clone_extra"] = {"family_counts": dict(fam), "test_days": len(pc), "days_only_reply_sent": sum(1 for f in pc.values() if f <= {"reply", "sent"})}
-out["freeze"] = {"commit": "8862642", "github_push_event_utc": "2026-09-27T19:16:34Z", "test_opened_utc": "2026-09-27T19:16:42Z"}
+out["freeze"] = {"commit_original": "8862642", "commit_after_history_rewrite": "20c6ceb", "github_push_event_utc": "2026-09-27T19:16:34Z", "test_opened_utc": "2026-09-27T19:16:42Z"}
 (R / "paper_numbers.json").write_text(json.dumps(out, indent=1, default=str))
 print(json.dumps({k: out[k] for k in ("pool_primary", "pool_secondary", "weak_complete_total", "weak_complete_positive_rate", "automated_share_weak", "auc", "inter_judge")}, indent=1))
 for f in ("metrics_val_primary", "metrics_test_primary", "metrics_test_secondary_fullpool"):

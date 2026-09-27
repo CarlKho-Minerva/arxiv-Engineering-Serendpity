@@ -2946,7 +2946,8 @@
   "days_only_reply_sent": 17
  },
  "freeze": {
-  "commit": "8862642",
+  "commit_original": "8862642",
+  "commit_after_history_rewrite": "20c6ceb",
   "github_push_event_utc": "2026-09-27T19:16:34Z",
   "test_opened_utc": "2026-09-27T19:16:42Z"
  }

@@ -1,1 +1,7 @@
-{"annotation_v1_commit": "88626426fa595fe3383d383b9046da51d3c74700", "test_opened_at": "2026-09-27T19:16:42Z"}
+{
+ "test_opened_at": "2026-09-27T19:16:42Z",
+ "annotation_v1_commit_original": "88626426fa595fe3383d383b9046da51d3c74700",
+ "annotation_v1_commit_after_history_rewrite": "20c6ceb7a705054a8c93d0f554c7cab86ffa3142",
+ "github_push_event_utc": "2026-09-27T19:16:34Z",
+ "note": "history rewritten 2026-09-27 to remove personal identifiers; see HISTORY_REWRITE.md"
+}
