@@ -27,8 +27,17 @@ LEDGER = os.path.join(CTRL, "step0_ledger.jsonl")
 STATUS = os.path.join(CTRL, "step0_status.json")
 LOG = os.path.join(CTRL, "step0.log")
 MANIFEST = os.path.join(CTRL, "manifest.json")
-WORKERS = 3
-TMP_AHEAD = 3
+WORKERS = 3  # CPU decoders when no game runs (1 while a game runs)
+TMP_AHEAD = 4
+# One NVDEC decoder on the INTERNAL card, only while no game runs (measured 16.6x realtime on 4K, ~+95 W; with the
+# eGPU vLLM at ~450 W the GPU sum stays ~575 W, under the 700 W guard used on 09-20; UPS is 1000 W). A guard thread
+# kills it within ~10 s of a game starting and the video is requeued. Never the eGPU: its VRAM is held by vLLM.
+HW_UUID = "GPU-2e6b3262-4ef2-2cf8-4f67-bc1437e15ffb"
+hw_proc = {"p": None, "killed_for_game": False}
+
+
+class GameInterrupt(Exception):
+    pass
 MIN_FREE_C = 150e9
 IDLE = 0x00000040  # IDLE_PRIORITY_CLASS
 WORKLIKE = re.compile(r"work|study|symph|code|coding|dev|build|homework|school|class|minerva|cs\d|project|hackathon|design|figma|thesis|capstone|research|intern|startup|somach|mentra|productiv|cowork|focus|pomodoro|writing|essay|pset|assignment|agent|demo|pitch|omi|wflo|velum|devlog", re.I)
@@ -129,10 +138,7 @@ def game():
 
 def status_loop():
     while True:
-        g = game()
         with lock:
-            state["game"] = g
-            state["workers_allowed"] = 1 if g else WORKERS
             s = dict(state)
         s["ts"] = time.strftime("%Y-%m-%dT%H:%M:%S%z")
         try:
@@ -149,7 +155,23 @@ def run(cmd):
     return subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8", errors="replace", creationflags=IDLE)
 
 
-def decode(item, src):
+def run_hw(cmd):
+    env = dict(os.environ, CUDA_VISIBLE_DEVICES=HW_UUID, CUDA_DEVICE_ORDER="PCI_BUS_ID")
+    p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, encoding="utf-8", errors="replace",
+                         creationflags=IDLE, env=env)
+    with lock:
+        hw_proc["p"] = p
+    out, err = p.communicate()
+    with lock:
+        hw_proc["p"] = None
+        killed = hw_proc["killed_for_game"]
+        hw_proc["killed_for_game"] = False
+    if killed:
+        raise GameInterrupt()
+    return subprocess.CompletedProcess(cmd, p.returncode, out, err)
+
+
+def decode(item, src, hw=False):
     key = item["key"]
     od = os.path.join(OUT, key)
     part = od + ".part"
@@ -163,14 +185,22 @@ def decode(item, src):
     has_video = any(s.get("codec_type") == "video" for s in streams)
     if not has_video:
         raise RuntimeError("no video stream: " + pr.stderr[:200])
-    cmd = ["ffmpeg", "-v", "error", "-y", "-threads", "6", "-i", src,
-           "-filter_complex", "[0:v:0]split=2[a][b];[a]fps=10,scale=-2:480:flags=bicubic[p];[b]fps=1/10:round=down,scale='min(1920,iw)':-2[k]",
+    if hw:
+        pre = ["-hwaccel", "cuda", "-hwaccel_output_format", "cuda"]
+        fc = ("[0:v:0]split=2[a][b];[a]fps=10,scale_cuda=-2:480,hwdownload,format=nv12[p];"
+              "[b]fps=1/10:round=down,scale_cuda='min(1920,iw)':-2,hwdownload,format=nv12[k]")
+    else:
+        pre = ["-threads", "6"]
+        fc = "[0:v:0]split=2[a][b];[a]fps=10,scale=-2:480:flags=bicubic[p];[b]fps=1/10:round=down,scale='min(1920,iw)':-2[k]"
+    runner = run_hw if hw else run
+    cmd = ["ffmpeg", "-v", "error", "-y"] + pre + ["-i", src,
+           "-filter_complex", fc,
            "-map", "[p]", "-c:v", "libx264", "-preset", "veryfast", "-crf", "30", "-g", "100", "-an", os.path.join(part, "proxy.mp4"),
            "-map", "[k]", "-q:v", "3", os.path.join(part, "kf", "f_%05d.jpg")]
     if has_audio:
         cmd += ["-map", "0:a:0", "-vn", "-ac", "1", "-ar", "16000", "-c:a", "flac", os.path.join(part, "audio.flac")]
     t = time.time()
-    r = run(cmd)
+    r = runner(cmd)
     kf_method = "fps=1/10"
     if r.returncode != 0 and "mjpeg" in r.stderr:
         # very short clips give the fps=1/10 branch no frame at all; take the first frame and then one every >= 10 s
@@ -181,7 +211,7 @@ def decode(item, src):
         cmd2[cmd.index("-filter_complex") + 1] = fc
         i = cmd2.index(os.path.join(part, "kf", "f_%05d.jpg"))
         cmd2[i:i] = ["-fps_mode", "vfr"]
-        r = run(cmd2)
+        r = runner(cmd2)
         kf_method = "select>=10s"
     if r.returncode != 0:
         raise RuntimeError(f"ffmpeg rc={r.returncode}: {r.stderr[-400:]}")
@@ -202,6 +232,7 @@ def decode(item, src):
     meta = {**item, "resolved_by_duration": resolved, "duration_s": dur, "start_time": float(fmt.get("start_time") or 0),
             "streams": streams, "has_audio": has_audio, "n_keyframes": n_kf, "keyframe_interval_s": 10, "keyframe_method": kf_method,
             "proxy": {"fps": 10, "height": 480, "codec": "h264", "crf": 30}, "decode_s": round(time.time() - t, 1),
+            "decoder": "nvdec-internal" if hw else "cpu",
             "ffmpeg_warnings": r.stderr[-400:] if r.stderr else ""}
     with open(os.path.join(part, "meta.json"), "w", encoding="utf-8") as fh:
         json.dump(meta, fh, indent=1)
@@ -267,25 +298,51 @@ def main():
         with lock:
             state["extracting"] = None
 
-    def worker(idx):
+    def game_guard():
+        while True:
+            g = game()
+            with lock:
+                state["game"] = g
+                state["workers_allowed"] = 1 if g else WORKERS
+                p = hw_proc["p"]
+                if g and p is not None and p.poll() is None:
+                    hw_proc["killed_for_game"] = True
+                    p.kill()
+                    log(f"game {g}: killed the NVDEC decode, video requeued")
+            time.sleep(10)
+
+    def worker(idx, hw=False):
         while True:
             with cond:
                 while True:
                     allowed = state["workers_allowed"]
-                    if ready and idx < allowed:
+                    ok = (state["game"] is None) if hw else (idx < allowed)
+                    if ready and ok:
                         it, src = ready.popleft(); cond.notify_all(); break
                     if finished["extract"] and not ready:
                         return
                     cond.wait(15)
             with lock:
-                state["decoding"].append(it["key"])
+                state["decoding"].append(it["key"] + (" (nvdec)" if hw else ""))
+            requeue = False
             try:
-                m = decode(it, src)
+                if hw:
+                    try:
+                        m = decode(it, src, hw=True)
+                    except GameInterrupt:
+                        raise
+                    except Exception as e:
+                        log(f"nvdec failed {it['key']}, retrying on CPU: {str(e)[:300]}")
+                        m = decode(it, src)
+                else:
+                    m = decode(it, src)
                 mark(it["key"], "step0", duration_s=m["duration_s"], n_keyframes=m["n_keyframes"], has_audio=m["has_audio"],
                      decode_s=m["decode_s"], extract_s=it.get("extract_s"))
                 with lock:
                     state["done"] += 1
                     state["hours_done"] = round(state["hours_done"] + m["duration_s"] / 3600, 2)
+            except GameInterrupt:
+                requeue = True
             except Exception as e:
                 log(f"decode failed {it['key']}: {e}\n{traceback.format_exc()[-800:]}")
                 mark(it["key"], "step0_failed", error=str(e)[:300])
@@ -293,14 +350,19 @@ def main():
                     state["failed"] += 1
             finally:
                 with lock:
-                    state["decoding"].remove(it["key"])
-                try:
-                    os.remove(src)
-                except OSError:
-                    pass
+                    state["decoding"].remove(it["key"] + (" (nvdec)" if hw else ""))
+                if requeue:
+                    with cond:
+                        ready.appendleft((it, src)); cond.notify_all()
+                else:
+                    try:
+                        os.remove(src)
+                    except OSError:
+                        pass
 
     threading.Thread(target=extractor, daemon=True).start()
-    ws = [threading.Thread(target=worker, args=(i,)) for i in range(WORKERS)]
+    threading.Thread(target=game_guard, daemon=True).start()
+    ws = [threading.Thread(target=worker, args=(i,)) for i in range(WORKERS)] + [threading.Thread(target=worker, args=(99, True))]
     for w in ws:
         w.start()
     for w in ws:
