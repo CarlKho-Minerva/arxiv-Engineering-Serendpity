@@ -3,6 +3,7 @@
 Uses `tar` over ssh (Windows ships bsdtar), so each video is one stream over the wired LAN.
 Also mirrors the PC ledgers/status into data/streams/_state/ for the other stages and the morning report.
 """
+import concurrent.futures as cf
 import json
 import subprocess
 import time
@@ -69,21 +70,30 @@ def main():
         done = ledger(STAGE)
         got_caps = ledger("sync_captions")
         order = {r["key"]: i for i, r in enumerate(json.loads(man))}
-        pulled = 0
-        for key in sorted(s0, key=lambda k: order.get(k, 1e9)):
-            if key in done:
-                continue
-            if pulled >= 20:  # leave room in every cycle for captions and a fresh status read
-                break
-            pulled += 1
+        batch = [k for k in sorted(s0, key=lambda k: order.get(k, 1e9)) if k not in done][:30]  # then captions + status
+
+        def primary(key):
             t = time.time()
             try:
                 if s0[key].get("has_audio"):
                     ensure_opus(key)
-                pull(key, ["meta.json", "proxy.mp4", "kf"] + (["audio.opus"] if s0[key].get("has_audio") else []))
+                pull(key, ["meta.json", "kf"] + (["audio.opus"] if s0[key].get("has_audio") else []))
                 mark(STAGE, key, s=round(time.time() - t, 1))
             except Exception as e:
                 log(STAGE, f"FAIL pull {key}: {e}")
+        # 3 streams: the relayed path gave 1.6 MB/s for one, 2.1 MB/s for four (measured 09-28 00:10)
+        with cf.ThreadPoolExecutor(3) as ex:
+            list(ex.map(primary, batch))
+        # proxies (only V-JEPA reads them) go last: over the relayed tailnet (~1.6 MB/s) keyframes + audio come first
+        if not [k for k in s0 if k not in ledger(STAGE)]:
+            got_proxy = ledger("sync_proxy")
+            for key in [k for k in sorted(s0, key=lambda k: order.get(k, 1e9)) if k not in got_proxy][:20]:
+                try:
+                    t = time.time()
+                    pull(key, ["proxy.mp4"])
+                    mark("sync_proxy", key, s=round(time.time() - t, 1))
+                except Exception as e:
+                    log(STAGE, f"FAIL pull proxy {key}: {e}")
         for key in sorted(caps, key=lambda k: order.get(k, 1e9)):
             if key in got_caps or key not in ledger(STAGE):
                 continue
@@ -93,7 +103,8 @@ def main():
             except Exception as e:
                 log(STAGE, f"FAIL pull captions {key}: {e}")
         if (STATE / "PC_STEP0_DONE").exists() and (STATE / "PC_CAPTIONS_DONE").exists() \
-                and set(s0) <= set(ledger(STAGE)) and set(caps) <= set(ledger("sync_captions")):
+                and set(s0) <= set(ledger(STAGE)) and set(caps) <= set(ledger("sync_captions")) \
+                and set(s0) <= set(ledger("sync_proxy")):
             log(STAGE, "all synced")
             return
         time.sleep(60)

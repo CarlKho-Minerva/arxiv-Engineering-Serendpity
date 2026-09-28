@@ -64,7 +64,8 @@ def work(key):
 
 def todo():
     done, bad = ledger(STAGE), failed_twice(STAGE)
-    return [k for k in synced_keys() if k not in done and k not in bad]
+    have = set(ledger("sync_proxy")) | {k for k in synced_keys() if (ROOT / k / "proxy.mp4").exists()}
+    return [k for k in synced_keys() if k in have and k not in done and k not in bad]
 
 
 if __name__ == "__main__":
