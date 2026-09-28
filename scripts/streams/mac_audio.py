@@ -4,8 +4,9 @@ This is what tags a stream "silent" (no transcription) versus "talking". CPU onl
 """
 import json
 
+import subprocess
+
 import numpy as np
-import soundfile as sf
 import torch
 from silero_vad import get_speech_timestamps, load_silero_vad
 
@@ -23,14 +24,15 @@ def todo():
 
 def work(key):
     d = ROOT / key
-    f = d / "audio.flac"
+    f = d / "audio.flac" if (d / "audio.flac").exists() else d / "audio.opus"
     if not f.exists():
         out = {"has_audio": False, "speech_s": 0.0, "speech_frac": 0.0}
         json.dump(out, open(d / "audio.json", "w"))
         return out
-    wav, sr = sf.read(str(f), dtype="float32")
-    if wav.ndim > 1:
-        wav = wav.mean(axis=1)
+    sr = 16000
+    raw = subprocess.run(["ffmpeg", "-v", "error", "-i", str(f), "-ac", "1", "-ar", str(sr), "-f", "f32le", "-"],
+                         capture_output=True, check=True).stdout
+    wav = np.frombuffer(raw, np.float32).copy()
     n = len(wav) // sr
     sec = wav[: n * sr].reshape(n, sr) if n else np.zeros((0, sr), dtype=np.float32)
     rms_db = (20 * np.log10(np.sqrt((sec ** 2).mean(axis=1)) + 1e-9)).round(1).tolist()

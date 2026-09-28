@@ -97,7 +97,7 @@ def fts_query(words):
 
 
 def link(vid, t):
-    return f"https://youtu.be/{vid}?t={int(t)}" if vid else None
+    return f"https://youtu.be/{vid.strip()}?t={int(t)}" if vid and vid.strip() else None
 
 
 def look(con, query, n, year):

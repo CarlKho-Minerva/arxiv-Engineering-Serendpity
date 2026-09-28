@@ -198,7 +198,9 @@ def decode(item, src, hw=False):
            "-map", "[p]", "-c:v", "libx264", "-preset", "veryfast", "-crf", "30", "-g", "100", "-an", os.path.join(part, "proxy.mp4"),
            "-map", "[k]", "-q:v", "3", os.path.join(part, "kf", "f_%05d.jpg")]
     if has_audio:
-        cmd += ["-map", "0:a:0", "-vn", "-ac", "1", "-ar", "16000", "-c:a", "flac", os.path.join(part, "audio.flac")]
+        cmd += ["-map", "0:a:0", "-vn", "-ac", "1", "-ar", "16000", "-c:a", "flac", os.path.join(part, "audio.flac"),
+                "-map", "0:a:0", "-vn", "-ac", "1", "-ar", "16000", "-c:a", "libopus", "-b:a", "24k", "-application", "voip",
+                os.path.join(part, "audio.opus")]
     t = time.time()
     r = runner(cmd)
     kf_method = "fps=1/10"

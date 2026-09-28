@@ -25,9 +25,18 @@ def pc_ledger(name, stage):
     return out
 
 
+def ensure_opus(key):
+    """Speech-grade 24 kbps Opus next to the FLAC on the PC (5x smaller over the relayed tailnet; FLAC stays there)."""
+    pc(f'if not exist "C:\\streams\\out\\{key}\\audio.opus" ffmpeg -v error -y -i "C:\\streams\\out\\{key}\\audio.flac" '
+       f'-c:a libopus -b:a 24k -application voip "C:\\streams\\out\\{key}\\audio.opus"', timeout=600)
+
+
 def pull(key, members):
     dst = ROOT
-    cmd = f"ssh -o ConnectTimeout=15 {PC} \"tar -C C:/streams/out -cf - {' '.join(f'{key}/{m}' for m in members)}\" | tar -xf - -C {dst}"
+    # "./" keeps YouTube ids that start with "-" from being read as tar options
+    # some keys are YouTube ids the Takeout CSV wrote with a leading space (ids starting with "-"): quote every path
+    paths = " ".join(f'"./{key}/{m}"' for m in members)
+    cmd = f"ssh -o ConnectTimeout=15 {PC} 'tar -C C:/streams/out -cf - {paths}' | tar -xf - -C '{dst}'"
     r = subprocess.run(["bash", "-o", "pipefail", "-c", cmd], capture_output=True, text=True, timeout=3600)
     if r.returncode != 0:
         raise RuntimeError(r.stderr[-300:])
@@ -69,7 +78,9 @@ def main():
             pulled += 1
             t = time.time()
             try:
-                pull(key, ["meta.json", "proxy.mp4", "kf"] + (["audio.flac"] if s0[key].get("has_audio") else []))
+                if s0[key].get("has_audio"):
+                    ensure_opus(key)
+                pull(key, ["meta.json", "proxy.mp4", "kf"] + (["audio.opus"] if s0[key].get("has_audio") else []))
                 mark(STAGE, key, s=round(time.time() - t, 1))
             except Exception as e:
                 log(STAGE, f"FAIL pull {key}: {e}")

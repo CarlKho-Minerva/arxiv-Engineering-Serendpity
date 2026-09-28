@@ -28,7 +28,8 @@ def work(key):
     a = json.load(open(d / "audio.json"))
     if not a.get("has_audio") or a["speech_s"] < 10 or a["speech_frac"] < 0.02:
         return {"skipped": "silent", "speech_s": a.get("speech_s", 0)}
-    r = mlx_whisper.transcribe(str(d / "audio.flac"), path_or_hf_repo=REPO, condition_on_previous_text=False,
+    af = d / "audio.flac" if (d / "audio.flac").exists() else d / "audio.opus"
+    r = mlx_whisper.transcribe(str(af), path_or_hf_repo=REPO, condition_on_previous_text=False,
                                no_speech_threshold=0.6, compression_ratio_threshold=2.4, verbose=None)
     speech = a["speech_segments"]
     keep, dropped = [], 0
