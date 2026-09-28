@@ -10,12 +10,15 @@ import json
 import os
 import sys
 
-sys.path.insert(0, os.path.expanduser("~/CODELocalProjects/recall-glasses"))
-sys.path.insert(0, os.path.expanduser("~/CODELocalProjects/state-tokens/src"))
+sys.path.insert(0, os.path.expanduser(os.environ.get("RG_DIR", "~/CODELocalProjects/recall-glasses")))
+sys.path.insert(0, os.path.expanduser(os.environ.get("ST_SRC", "~/CODELocalProjects/state-tokens/src")))
 from common import ROOT, failed_twice, ledger, loop, synced_keys, upstream_done  # noqa: E402
 
 STAGE = "relate"
-rd = __import__("00_relations_day")  # LABELS, PREDICATES, MIN_CONF live there; one vocabulary for all lanes
+try:
+    rd = __import__("00_relations_day")  # LABELS, PREDICATES, MIN_CONF live there; one vocabulary for all lanes
+except ImportError:
+    import relations_vocab as rd  # worker copy of the same constants
 from backend import config  # noqa: E402
 
 config.LABELS[:] = rd.LABELS
@@ -56,4 +59,4 @@ def todo():
 
 
 if __name__ == "__main__":
-    loop(STAGE, todo, work, done_flag=lambda: upstream_done(STAGE) and (ROOT / "_state" / "PC_CAPTIONS_DONE").exists())
+    loop(STAGE, todo, work, done_flag=lambda: upstream_done(STAGE) and (ROOT / "_state" / "PC_CAPTIONS_DONE").exists(), outputs=("relations.jsonl",))

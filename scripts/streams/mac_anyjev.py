@@ -127,4 +127,4 @@ def todo():
 
 
 if __name__ == "__main__":
-    loop(STAGE, todo, work, done_flag=lambda: upstream_done(STAGE) and (ROOT / "_state" / "PC_CAPTIONS_DONE").exists())
+    loop(STAGE, todo, work, done_flag=lambda: upstream_done(STAGE) and (ROOT / "_state" / "PC_CAPTIONS_DONE").exists(), outputs=("anyjev.jsonl",))

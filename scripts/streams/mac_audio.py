@@ -69,6 +69,9 @@ def pooled_loop(workers=4):
                 k = futs[f]
                 try:
                     info, dt = f.result()
+                    from common import PUSH, push
+                    if PUSH:
+                        push(k, ["audio.json"])
                     mark(STAGE, k, s=round(dt, 1), **info)
                 except Exception as e:
                     log(STAGE, f"FAIL {k}: {e}")

@@ -45,4 +45,4 @@ def work(key):
 
 
 if __name__ == "__main__":
-    loop(STAGE, todo, work, done_flag=lambda: upstream_done("audio", STAGE))
+    loop(STAGE, todo, work, done_flag=lambda: upstream_done("audio", STAGE), outputs=("transcript.json",))

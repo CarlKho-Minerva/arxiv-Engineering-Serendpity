@@ -48,4 +48,4 @@ def work(key):
 
 
 if __name__ == "__main__":
-    loop(STAGE, todo, work, done_flag=lambda: upstream_done(STAGE))
+    loop(STAGE, todo, work, done_flag=lambda: upstream_done(STAGE), outputs=("siglip.npy",))

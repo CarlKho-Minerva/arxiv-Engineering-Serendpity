@@ -5,6 +5,7 @@ Also mirrors the PC ledgers/status into data/streams/_state/ for the other stage
 """
 import concurrent.futures as cf
 import json
+import os
 import subprocess
 import time
 
@@ -46,6 +47,14 @@ def pull(key, members):
         raise RuntimeError(f"pulled but missing {missing}: {r.stderr[-200:]}")
 
 
+def full_pull(key):
+    cmd = (f"ssh -o ConnectTimeout=15 {PC} 'tar -C C:/streams/out --exclude audio.flac --exclude \"*.tmp.opus\" -cf - \"./{key}\"' "
+           f"| tar -xf - -C '{ROOT}'")
+    r = subprocess.run(["bash", "-o", "pipefail", "-c", cmd], capture_output=True, text=True, timeout=3600)
+    if r.returncode != 0 or not (ROOT / key / "meta.json").exists():
+        raise RuntimeError(f"full pull {key}: {r.stderr[-300:]}")
+
+
 def main():
     log(STAGE, "start")
     while True:
@@ -69,6 +78,8 @@ def main():
             continue
         done = ledger(STAGE)
         got_caps = ledger("sync_captions")
+        if (STATE / "PC_STEP0_DONE").exists() and s0 and set(s0) <= set(done):
+            (STATE / "SYNC_DONE").write_text(f"{len(done)} videos\n")
         order = {r["key"]: i for i, r in enumerate(json.loads(man))}
         batch = [k for k in sorted(s0, key=lambda k: order.get(k, 1e9)) if k not in done][:30]  # then captions + status
 
@@ -77,7 +88,12 @@ def main():
             try:
                 if s0[key].get("has_audio"):
                     ensure_opus(key)
-                pull(key, ["meta.json", "kf"] + (["audio.opus"] if s0[key].get("has_audio") else []))
+                if os.environ.get("STREAMS_FULL_PULL") == "1":  # worker on the PC's LAN: everything but the FLAC, one stream
+                    full_pull(key)
+                    for extra in ("sync_captions", "sync_proxy"):
+                        mark(extra, key)
+                else:
+                    pull(key, ["meta.json", "kf"] + (["audio.opus"] if s0[key].get("has_audio") else []))
                 mark(STAGE, key, s=round(time.time() - t, 1))
             except Exception as e:
                 log(STAGE, f"FAIL pull {key}: {e}")

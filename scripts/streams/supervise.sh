@@ -4,8 +4,8 @@
 # supervise.json each minute so the morning report (and anyone else) can see what is running.
 # Start: nohup scripts/streams/supervise.sh >/dev/null 2>&1 &     Stop everything: touch data/streams/_state/STOP
 cd "$(dirname "$0")" || exit 1
-PY=../../.venv/bin/python
-RG=~/CODELocalProjects/recall-glasses/.venv/bin/python
+PY=${PY:-../../.venv/bin/python}
+RG=${RG:-~/CODELocalProjects/recall-glasses/.venv/bin/python}
 ST=../../data/streams/_state
 STAGES="sync audio whisper ocr siglip vjepa anyjev relate"   # bash 3.2 on macOS: no associative arrays
 cmd_for() { if [ "$1" = relate ]; then echo "$RG -u mac_relate.py"; else echo "$PY -u mac_$1.py"; fi; }

@@ -17,6 +17,7 @@ STATE = ROOT / "_state"
 ROOT.mkdir(parents=True, exist_ok=True)
 STATE.mkdir(parents=True, exist_ok=True)
 PC = os.environ.get("PC_HOST", "PC")
+PUSH = os.environ.get("STREAMS_PUSH") == "1"  # worker mode (forge-m5-48): send each stage's outputs back to the PC
 
 
 def log(stage, msg):
@@ -69,8 +70,21 @@ def pc(cmd, timeout=120):
     return r.stdout
 
 
-def loop(stage, todo_fn, work_fn, idle_s=60, done_flag=None):
-    """Run work_fn(key) for every key todo_fn() yields, forever (until done_flag() says the upstream is finished)."""
+def push(key, files):
+    """Copy result files for one video back to the PC (C:\\streams\\out\\<key>\\), the single home of the stream data."""
+    files = [f for f in files if (ROOT / key / f).exists()]
+    if not files:
+        return
+    paths = " ".join(f"'./{key}/{f}'" for f in files)
+    cmd = f"tar -C '{ROOT}' -cf - {paths} | ssh -o ConnectTimeout=15 {PC} 'tar -xf - -C C:/streams/out'"
+    r = subprocess.run(["bash", "-o", "pipefail", "-c", cmd], capture_output=True, text=True, timeout=1800)
+    if r.returncode != 0:
+        raise RuntimeError(f"push {key} {files}: {r.stderr[-300:]}")
+
+
+def loop(stage, todo_fn, work_fn, idle_s=60, done_flag=None, outputs=()):
+    """Run work_fn(key) for every key todo_fn() yields, forever (until done_flag() says the upstream is finished).
+    In worker mode (STREAMS_PUSH=1) the stage's `outputs` are pushed to the PC before the key is marked done."""
     log(stage, "start")
     while True:
         todo = todo_fn()
@@ -87,6 +101,8 @@ def loop(stage, todo_fn, work_fn, idle_s=60, done_flag=None):
             t = time.time()
             try:
                 info = work_fn(key) or {}
+                if PUSH and outputs:
+                    push(key, outputs)
                 mark(stage, key, s=round(time.time() - t, 1), **info)
             except Exception as e:
                 import traceback
@@ -109,8 +125,8 @@ def failed_twice(stage):
 
 def upstream_done(*stages):
     """True when the PC finished Step 0 and every listed local stage covered every synced key."""
-    if not (STATE / "PC_STEP0_DONE").exists():
-        return False
+    if not (STATE / "PC_STEP0_DONE").exists() or not (STATE / "SYNC_DONE").exists():
+        return False  # SYNC_DONE: every PC video is here (without it an empty sync ledger looked "finished", 09-28)
     keys = set(ledger("sync"))
     return all(keys <= set(ledger(s)) | failed_twice(s) for s in stages)
 
