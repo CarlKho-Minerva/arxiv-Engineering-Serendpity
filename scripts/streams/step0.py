@@ -187,6 +187,12 @@ def decode(item, src):
         raise RuntimeError(f"ffmpeg rc={r.returncode}: {r.stderr[-400:]}")
     fmt = info.get("format", {})
     dur = float(fmt.get("duration") or 0)
+    if dur <= 0:  # live-recorded webm often carries no duration; our own proxy has an exact one
+        pp = run(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", os.path.join(part, "proxy.mp4")])
+        try:
+            dur = float(pp.stdout.strip())
+        except ValueError:
+            dur = 0.0
     resolved = None
     if item.get("candidates"):  # same title on several videos: take the one whose duration is closest
         best = min(item["candidates"], key=lambda c: abs(float(c["duration_ms"] or 0) / 1000 - dur))

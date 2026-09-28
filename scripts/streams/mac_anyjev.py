@@ -55,7 +55,7 @@ def states_for(key):
     d = ROOT / key
     m = json.load(open(d / "meta.json"))
     title = m["inner"].rsplit("/", 1)[-1].rsplit(".", 1)[0]
-    dur = float(m.get("duration_s") or 0)
+    dur = float(m.get("duration_s") or 0) or 10.0 * m.get("n_keyframes", 0)  # some webm report no duration
     caps = read_jsonl(d / "captions.jsonl")
     ocr = read_jsonl(d / "ocr.jsonl")
     tr = json.load(open(d / "transcript.json"))["segments"] if (d / "transcript.json").exists() else []
