@@ -12,18 +12,22 @@ import re
 import zipfile
 from datetime import datetime
 
+# The second account's folder name contains an address, so it lives only in a local file on the PC (not in git).
+_LOCAL = r"D:\streams\local_paths.json"
+SECOND = json.load(open(_LOCAL))["second_account_takeout_dir"] if os.path.exists(_LOCAL) else r"F:\missing-local_paths.json"
+
 SOURCES = [  # (zip, member) from the file catalog, 2026-09-27
     (r"D:\carlcrafters-takeout\takeout-20260820T180808Z-4-006.zip", "takeout-20260820/Takeout/YouTube and YouTube Music/history/watch-history.html", "watch"),
     (r"D:\carlcrafters-takeout-20260906\takeout-20260906T050316Z-5-013.zip", "Takeout/YouTube and YouTube Music/history/watch-history.html", "watch"),
     (r"D:\carlcrafters-takeout-20260915\takeout-20260915T025727Z-5-015.zip", "takeout-20260915/Takeout/YouTube and YouTube Music/history/watch-history.html", "watch"),
-    (r"F:\GDrive-Archive-Jul2026\02_account_SECOND_ACCOUNT\takeout_20260722T222739Z\takeout-20260722T222739Z-1-001.zip", "takeout-minerva-20260722/Takeout/YouTube and YouTube Music/history/watch-history.html", "watch"),
+    (SECOND + r"\takeout-20260722T222739Z-1-001.zip", "takeout-minerva-20260722/Takeout/YouTube and YouTube Music/history/watch-history.html", "watch"),
     (r"D:\carlcrafters-takeout\takeout-20260820T180808Z-4-006.zip", "takeout-20260820/Takeout/YouTube and YouTube Music/history/search-history.html", "yt_search"),
     (r"D:\carlcrafters-takeout-20260906\takeout-20260906T050316Z-5-013.zip", "Takeout/YouTube and YouTube Music/history/search-history.html", "yt_search"),
     (r"D:\carlcrafters-takeout-20260915\takeout-20260915T025727Z-5-015.zip", "takeout-20260915/Takeout/YouTube and YouTube Music/history/search-history.html", "yt_search"),
     (r"D:\carlcrafters-takeout\takeout-20260820T180808Z-2-001.zip", "takeout-20260820/Takeout/My Activity/Search/MyActivity.html", "g_search"),
     (r"D:\carlcrafters-takeout-20260906\takeout-20260906T050316Z-2-001.zip", "Takeout/My Activity/Search/MyActivity.html", "g_search"),
     (r"D:\carlcrafters-takeout-20260915\takeout-20260915T025727Z-2-001.zip", "takeout-20260915/Takeout/My Activity/Search/MyActivity.html", "g_search"),
-    (r"F:\GDrive-Archive-Jul2026\02_account_SECOND_ACCOUNT\takeout_20260722T222739Z\takeout-20260722T222739Z-2-001.zip", "takeout-minerva-20260722/Takeout/My Activity/Search/MyActivity.html", "g_search"),
+    (SECOND + r"\takeout-20260722T222739Z-2-001.zip", "takeout-minerva-20260722/Takeout/My Activity/Search/MyActivity.html", "g_search"),
 ]
 OUT = r"D:\streams\history"
 CELL = re.compile(r'<div class="content-cell mdl-cell mdl-cell--6-col mdl-typography--body-1">(.*?)</div>', re.S)

@@ -122,7 +122,7 @@ code on disk has small uncommitted diffs relative to the run.
 | FB ads: preferences, interests, advertisers, categories, locations | `…\ads_information\*.json`, `…\other_logged_information\ads_interests.json`, `…\preferences\your_preferred_categories.json` | JSON | 2026-09-20 | 8 KB – 533 KB | inferred-interest lists |
 | FB behavior logs (items viewed, groups/events visited, profile visits, reels, search, off-Meta activity) | `…\logged_information\…` | JSON | 2026-09-20 | up to 524 KB | behavior, not recommendations |
 | YouTube watch + search history, subscriptions (<account-A>) | `D:\<account-A>-takeout-20260915\…\YouTube and YouTube Music\history\watch-history.html` | HTML | 08-20, 09-06, 09-15 | 48.5 / 68.5 / 64.5 MB | **shrinking between exports**: auto-delete suspected |
-| YouTube (Minerva account) | `F:\GDrive-Archive-Jul2026\02_account_kho-at-uni.minerva.edu\takeout_20260722T222739Z` | HTML | 2026-07-22 | 5.5 MB | |
+| YouTube (Minerva account) | `F:\GDrive-Archive-Jul2026\<second-account>\takeout_20260722T222739Z` | HTML | 2026-07-22 | 5.5 MB | |
 | Google My Activity (<account-A>): YouTube, Search, Ads, Discover, My Ad Center, News, Play, Image Search | `…\Takeout\My Activity\*\MyActivity.html` | HTML | 2026-09-15 | 85.7 / 57.7 / 4.0 / 0.3 / 0.15 / 0.2 / 3.6 / 9.1 MB | Discover CSVs 16–52 bytes (headers only) |
 | Google My Activity (Minerva) | same layout | HTML | 2026-07-22 | Search 21 MB, Maps 19.9 MB, YouTube 5.6 MB | |
 | Twitter inferred interests (2 handles) | `E:\twitter-export-aug2026\…\data\personalization.js` | JS | 2026-08-08/09 | 43 KB | ad-impressions/engagements empty |
